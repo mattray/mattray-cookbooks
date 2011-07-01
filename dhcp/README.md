@@ -1,10 +1,18 @@
 Description
 ===========
-Configures a DHCP server.  Includes LWRP for managing hosts, groups and subnets. Based off of work initially done by Dell, extended by Atalanta Systems and reworked by Opscode.
+Configures a DHCP server.  Includes LWRPs for managing hosts, groups and subnets. 
+
+If you need PXE-boot installations, you can use this cookbook with `pxe_dust` which will configure the `tftp` cookbook and prepare the bootable images.
+
+Based off of work initially done by Dell, extended by Atalanta Systems and reworked by Opscode.
 
 Requirements
 ============
 Tested with Ubuntu 10.04 and Chef 0.10.
+
+Limitations
+===========
+Pools, failovers, classes and subclasses are not yet supported.
 
 Recipes
 =======
@@ -14,13 +22,18 @@ Passes through to the server.
 
 server
 ------
-The node will install and configure the `dhcp3-server` application. Configuration is through the `dhcp` data bag. 
+The node will install and configure the `dhcp3-server` application. Configuration is through the `dhcp` data bag.
 
 Data Bag
 ========
 dhcp
 ----
-Configuration for this service is through the `dhcp` data bag so other cookbooks and recipes may have access to this information as necessary.
+Configuration for this service is through the `dhcp` data bag so other cookbooks and recipes may have access to this information as necessary. The configuration of the `dhcpd.conf` can either be done through attributes or through the `default` item in the data bag (data bag takes prescedence). 
+
+```
+% knife data bag create dhcp
+% knife data bag from file dhcp examples/default.json
+```
 
 Resources/Providers
 ===================
