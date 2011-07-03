@@ -73,6 +73,7 @@ template "/etc/dhcp3/dhcpd.conf" do
   notifies :restart, resources(:service => "dhcp3-server"), :delayed
 end
 
+#groups
 groups = []
 directory "/etc/dhcp3/groups.d"
 
@@ -80,33 +81,44 @@ template "/etc/dhcp3/groups.d/group_list.conf" do
   owner "root"
   group "root"
   mode 0644
-  source "group_list.conf.erb"
-  variables (:groups => groups)
+  source "list.conf.erb"
+  variables(
+    :item => "groups",
+    :items => groups
+    )
   action :create
   notifies :restart, resources(:service => "dhcp3-server"), :delayed
 end
 
-# file "/etc/dhcp3/groups.d/group_list.conf" do
-#   owner "root"
-#   group "root"
-#   mode 0644
-# end
+#subnets
+subnets = []
+directory "/etc/dhcp3/subnets.d"
 
-# directory "/etc/dhcp3/subnets.d"
+template "/etc/dhcp3/subnets.d/subnet_list.conf" do
+  owner "root"
+  group "root"
+  mode 0644
+  source "list.conf.erb"
+  variables(
+    :item => "subnets",
+    :items => subnets
+    )
+  action :create
+  notifies :restart, resources(:service => "dhcp3-server"), :delayed
+end
 
-# file "/etc/dhcp3/subnets.d/subnet_list.conf" do
-#   owner "root"
-#   group "root"
-#   mode 0644
-# end
-
-# directory "/etc/dhcp3/hosts.d"
-
-# file "/etc/dhcp3/hosts.d/host_list.conf" do
-#   owner "root"
-#   group "root"
-#   mode 0644
-# end
-
-
-
+#hosts
+hosts = []
+directory "/etc/dhcp3/hosts.d"
+template "/etc/dhcp3/hosts.d/host_list.conf" do
+  owner "root"
+  group "root"
+  mode 0644
+  source "list.conf.erb"
+  variables(
+    :item => "hosts",
+    :items => hosts
+    )
+  action :create
+  notifies :restart, resources(:service => "dhcp3-server"), :delayed
+end
