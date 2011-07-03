@@ -1,8 +1,10 @@
 default[:dhcp][:interfaces] = [ "eth0" ]
 
+default[:dhcp][:allows] = []
+
 default[:dhcp][:parameters] = {
   "default-lease-time" => "600",
-  "max_lease-time" => "7200",
+  "max-lease-time" => "7200",
   "ddns-update-style" => "none",
   "log-facility" => "local7"
 }

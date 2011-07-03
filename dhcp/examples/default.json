@@ -1,6 +1,6 @@
 {
     "id": "default",
-    "allow": ["booting", "bootp"],
+    "allows": ["booting", "bootp"],
     "parameters": {
         "default-lease-time": "86400",
         "max-lease-time": "604800"

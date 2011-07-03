@@ -1,9 +1,17 @@
-# File managed by puppet
+# File managed by Chef
 
-group "<%= @name %>" {
-<% if not @options.empty? -%>
-<%   @options.each do |option| -%>
-  <%= option %>;
-<%   end -%>
+#<%= @name %>
+group  {
+<% @parameters.each do |parameter| -%>
+  <%= parameter %>;
+<% end -%>
+
+<% @options.each do |option| -%>
+  option <%= option %>;
+<% end -%>
+
+<% @hosts.each do |host| -%>
+  host <%= host.id %> {
+  }
 <% end -%>
 }
