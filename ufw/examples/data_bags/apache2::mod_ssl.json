@@ -1,0 +1,23 @@
+{
+    "id": "apache2::mod_ssl",
+    "green": {
+        "http": {
+            "port": "443"
+        }
+    },
+    "red": {
+        "http": {
+            "port": "443"
+        },
+        "block http from 192.168.1.0/24": {
+            "port" => "443",
+            "source" => "192.168.1.0/24",
+            "action" => "deny"
+        }
+    },
+    "yellow": {
+        "http": {
+            "port": "444"
+        }
+    }
+}

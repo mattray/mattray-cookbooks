@@ -1,5 +1,5 @@
 {
-    "id": "apache",
+    "id": "apache2",
     "green": {
         "http": {
             "port": "80"
@@ -21,6 +21,3 @@
         }
     }
 }
-
-
-        }

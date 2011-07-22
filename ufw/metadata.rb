@@ -8,3 +8,12 @@ version          "0.0.1"
 %w{ ubuntu }.each do |os|
   supports os
 end
+
+attribute "firewall/rules",
+  :display_name => "List of firewall rules for the node.",
+  :description => "List of firewall rules for the node. Possibly set by node, roles or data bags.",
+  :type => "array"
+
+attribute "firewall/securitylevel",
+  :display_name => "Security level of the node.",
+  :description => "Security level of the node, may be set by node, roles or environment."

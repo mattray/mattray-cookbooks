@@ -10,15 +10,13 @@ Tested with Ubuntu 10.04 and 11.04.
 
 Recipes
 =======
-The `default` and `securitylevels` recipes are independent and may be applied individually or together in the order you want rules applied.
-
 default
 -------
 The `default` recipe looks for the list of firewall rules to apply from the `['firewall']['rules']` attribute added to roles and on the node itself. The list of rules is then applied to the node in the order specified.
 
 securitylevels
 --------------
-The `securitylevels` recipe looks in the `firewall` data bag for different security levels to apply firewall rules. The list of rules to apply is found by looking at the run list for keys that map to the data bag and applied in the the order specified.
+The `securitylevels` recipe looks in the `firewall` data bag for different security levels to apply firewall rules. The list of rules to apply is found by looking at the run list for keys that map to the data bag and applied in the the order specified. The `securitylevels` recipe calls the `default` recipe after the `['firewall']['rules']` attribute is set to appy the rules.
 
 Attributes
 ==========
@@ -55,12 +53,12 @@ If you are using security levels, there will be a `['firewall']['securitylevel']
 
 Data Bags
 =========
-If you are using security levels, the 'firewall' data bag will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Within the item, there will be a keys corresponding to security levels (ie. 'green', 'red', 'yellow'). These keys will contain hashes to apply to the  `['firewall']['rules']` attribute.
+If you are using security levels, the 'firewall' data bag will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Either roles or recipes may be keys (role[webserver] is 'webserver', recipe[apache2] is 'apache2' and recipe[apache2::mod_ssl] is 'apache2::mod_ssl'. Within the item, there will be a keys corresponding to security levels (ie. 'green', 'red', 'yellow'). These keys will contain hashes to apply to the  `['firewall']['rules']` attribute.
 
 # Example 'firewall' data bag item
 
     {
-        "id": "apache",
+        "id": "apache2",
         "green": {
             "http": {
                 "port": "80"

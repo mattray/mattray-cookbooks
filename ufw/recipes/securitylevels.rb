@@ -1,7 +1,7 @@
 #
 # Author:: Matt Ray <matt@opscode.com>
 # Cookbook Name:: ufw
-# Recipe:: default
+# Recipe:: securitylevels
 #
 # Copyright 2011, Opscode, Inc
 #
@@ -18,17 +18,15 @@
 # limitations under the License.
 #
 
-#package "ufw"
-
-#assume this works, if not, "ufw enable" 
-# service "ufw" do
-#   supports :restart => true, :status => true, :reload => true
-#   action [ :enable ]
-# end
-
-#default is to turn everything off
-#execute "ufw default deny"
-
-node['firewall']['rules'].each do |rule|
-  Chef::Log.info "firewall_rule \"#{rule}\""
+node.run_list.each do |entry|
+  #pull the role or recipe name out
+  id = entry[5..-2] if entry.start_with?("role[")
+  id = entry[7..-2] if entry.start_with?("recipe[")
+  item = data_bag_item('firewall', id)
+  next if item.nil? #nothing found
+  #add the list of firewall rules to the current list
+  node['firewall']['rules'].concat(item[node['firewall']['securitylevel']])
 end
+
+#now go apply the rules
+include_recipe "ufw::default"
