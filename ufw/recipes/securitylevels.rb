@@ -18,14 +18,39 @@
 # limitations under the License.
 #
 
-node.run_list.each do |entry|
-  #pull the role or recipe name out
-  id = entry[5..-2] if entry.start_with?("role[")
-  id = entry[7..-2] if entry.start_with?("recipe[")
-  item = data_bag_item('firewall', id)
-  next if item.nil? #nothing found
-  #add the list of firewall rules to the current list
-  node['firewall']['rules'].concat(item[node['firewall']['securitylevel']])
+#flatten the run_list to just the names of the roles and recipes in order
+def run_list_names(run_list)
+  names = []
+  run_list.each do |entry|
+    Chef::Log.debug "ufw::securitylevels:run_list_names+name: #{entry.name}"
+    if entry.name.index('::') #cookbook::recipe
+      names.push(entry.name.sub('::', '__'))
+    else
+      names.push(entry.name)
+    end
+    if entry.role?
+      rol = search(:role, "name:#{entry.name}")[0]
+      names.concat(run_list_names(rol.run_list))
+    end
+  end
+  Chef::Log.debug "ufw::securitylevels:run_list_names+names: #{names}"
+  return names
+end
+
+fw_db = data_bag('firewall')
+
+rlist = run_list_names(node.run_list).uniq!
+Chef::Log.debug "ufw::securitylevels:rlist: #{rlist}"
+
+rlist.each do |entry|
+  Chef::Log.info "ufw::securitylevels: \"#{entry}\""
+  if fw_db.member?(entry)
+    #add the list of firewall rules to the current list
+    item = data_bag_item('firewall', entry)
+    sl = node['firewall']['securitylevel']
+    rules = item[sl]
+    node['firewall']['rules'].concat(rules) unless rules.nil?
+  end
 end
 
 #now go apply the rules

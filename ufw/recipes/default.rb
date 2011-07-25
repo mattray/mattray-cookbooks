@@ -30,5 +30,5 @@
 #execute "ufw default deny"
 
 node['firewall']['rules'].each do |rule|
-  Chef::Log.info "firewall_rule \"#{rule}\""
+  Chef::Log.info "ufw:firewall_rule \"#{rule}\""
 end
