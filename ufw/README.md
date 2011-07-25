@@ -2,7 +2,7 @@ Description
 ===========
 Configures Uncomplicated Firewall (ufw) on Ubuntu. Including the `ufw` recipe in a run list means the firewall will be enabled and will deny everything except SSH and ICMP ping by default.
 
-Rules may be added to the node by adding them to the `['firewall']['rules']` attributes in roles or on the node directly. There is an LWRP that may be used to apply rules directly from other recipes as well. There is no need to explicitly remove rules, they are reevaluated on changes and reset. Rules are applied in the order of the run list, unless ordering is explictly added.
+Rules may be added to the node by adding them to the `['firewall']['rules']` attributes in roles or on the node directly. The `firewall` cookbook has an LWRP that may be used to apply rules directly from other recipes as well. There is no need to explicitly remove rules, they are reevaluated on changes and reset. Rules are applied in the order of the run list, unless ordering is explictly added.
 
 Requirements
 ============
@@ -16,69 +16,73 @@ The `default` recipe looks for the list of firewall rules to apply from the `['f
 
 securitylevels
 --------------
-The `securitylevels` recipe looks in the `firewall` data bag for different security levels to apply firewall rules. The list of rules to apply is found by looking at the run list for keys that map to the data bag and applied in the the order specified. The `securitylevels` recipe calls the `default` recipe after the `['firewall']['rules']` attribute is set to appy the rules.
+The `securitylevels` recipe looks in the `firewall` data bag for different security levels to apply firewall rules. There is a `['firewall']['securitylevel']` attribute used to key the 'firewall' data bag. The list of rules to apply is found by looking at the run list for keys that map to the data bag and applied in the the order specified.
+The `securitylevels` recipe calls the `default` recipe after the `['firewall']['rules']` attribute is set to appy the rules, so you may mix roles with securitylevels if you want (roles apply first, then data bag contents).
 
 Attributes
 ==========
 Roles and the node may have the `['firewall']['rules']` attribute set. This attribute is a list of hashes, the key will be rule name, the value will be the hash of parameters. Application order is based on run list.
 
-If you are using security levels, there will be a `['firewall']['securitylevel']` attribute used to key the 'firewall' data bag.
-
 # Example Role
-    name "fw_examples"
+    name "fw_example"
     description "Firewall rules for Examples"
     override_attributes(
       "firewall" => {
-        "rules" => {
-          "tftp" => {},
-          "http" => {
-            "port" => "80"
+        "rules" => [
+          {"tftp" => {}},
+          {"http" => {
+              "port" => "80"
+            }
           },
-          "block tomcat from 192.168.1.0/24" => {
-            "port" => "8080",
-            "source" => "192.168.1.0/24",
-            "action" => "deny"
+          {"block tomcat from 192.168.1.0/24" => {
+              "port" => "8080",
+              "source" => "192.168.1.0/24",
+              "action" => "deny"
+            }
           },
-          "Allow access to udp 1.2.3.4 port 5469 from 1.2.3.5 port 5469" => {
-            "protocol" => "udp",
-            "port" => "5469",
-            "source" => "1.2.3.4",
-            "destination" => "1.2.3.5",
-            "dest_port" => "5469"
+          {"Allow access to udp 1.2.3.4 port 5469 from 1.2.3.5 port 5469" => {
+              "protocol" => "udp",
+              "port" => "5469",
+              "source" => "1.2.3.4",
+              "destination" => "1.2.3.5",
+              "dest_port" => "5469"
+            }
           }
-        }
+        ]
       }
       )
 
-
 Data Bags
 =========
-If you are using security levels, the 'firewall' data bag will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Either roles or recipes may be keys (role[webserver] is 'webserver', recipe[apache2] is 'apache2' and recipe[apache2::mod_ssl] is 'apache2::mod_ssl'. Within the item, there will be a keys corresponding to security levels (ie. 'green', 'red', 'yellow'). These keys will contain hashes to apply to the  `['firewall']['rules']` attribute.
+If you are using security levels, the `firewall` data bag will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Either roles or recipes may be keys (role[webserver] is 'webserver', recipe[apache2] is 'apache2'). If you have recipe-specific firewall rules, you will need to replace the '::' with '__' (double underscores) (eg. recipe[apache2::mod_ssl] is 'apache2__mod_ssl' in the data bag item). Within the item, there will be a keys corresponding to security levels (ie. 'green', 'red', 'yellow'). These keys will contain hashes to apply to the `['firewall']['rules']` attribute.
+
+    % knife data bag create firewall
+    % knife data bag from file firewall examples/data_bags/apache2.json
 
 # Example 'firewall' data bag item
 
     {
         "id": "apache2",
-        "green": {
-            "http": {
+        "green": [
+            {"http": {
                 "port": "80"
-            }
-        },
-        "red": {
-            "http": {
+            }}
+        ],
+        "red": [
+            {"http": {
                 "port": "80"
-            },
-            "block http from 192.168.1.0/24": {
-                "port" => "80",
-                "source" => "192.168.1.0/24",
-                "action" => "deny"
-            }
-        },
-        "yellow": {
-            "http": {
+            }},
+            {"block http from 192.168.1.0/24": {
+                "port": "80",
+                "source": "192.168.1.0/24",
+                "action": "deny"
+            }}
+        ],
+        "yellow": [
+            {"http": {
                 "port": "81"
-            }
-        }
+            }}
+        ]
     }
 
 Resources/Providers
@@ -102,17 +106,21 @@ rule
 - interface: optional, defaults to all interfaces.
 
 # Examples
-    firewall_rule "tftp"
+    firewall_rule "tftp" do
+       notifies :enable, "firewall[ufw]"
+    end
 
     firewall_rule "tomcat" do
        port "8080"
        action :allow
+       notifies :enable, "firewall[ufw]"
     end
 
     firewall_rule "block tomcat from 192.168.1.0/24" do
        port "8080"
        source "192.168.1.0/24"
        action :deny
+       notifies :enable, "firewall[ufw]"
     end
 
     firewall_rule "Allow access to udp 1.2.3.4 port 5469 from 1.2.3.5 port 5469" do
@@ -122,10 +130,15 @@ rule
        destination "1.2.3.5"
        dest_port "5469"
        action :allow
+       notifies :enable, "firewall[ufw]"
+    end
+
+    firewall "ufw" do
+      action :nothing
     end
 
 Limitations
-=====
+===========
 Logging and limiting are not yet supported. Logging will be added next.
 
 License and Author
