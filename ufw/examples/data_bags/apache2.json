@@ -1,23 +1,23 @@
 {
     "id": "apache2",
-    "green": {
-        "http": {
+    "green": [
+        {"http": {
             "port": "80"
-        }
-    },
-    "red": {
-        "http": {
+        }}
+    ],
+    "red": [
+        {"http": {
             "port": "80"
-        },
-        "block http from 192.168.1.0/24": {
-            "port" => "80",
-            "source" => "192.168.1.0/24",
-            "action" => "deny"
-        }
-    },
-    "yellow": {
-        "http": {
+        }},
+        {"block http from 192.168.1.0/24": {
+            "port": "80",
+            "source": "192.168.1.0/24",
+            "action": "deny"
+        }}
+    ],
+    "yellow": [
+        {"http": {
             "port": "81"
-        }
-    }
+        }}
+    ]
 }
