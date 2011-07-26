@@ -18,19 +18,16 @@
 # limitations under the License.
 #
 
-#package "ufw"
-
-#assume this works, if not, "ufw enable" 
-# service "ufw" do
-#   supports :restart => true, :status => true, :reload => true
-#   action [ :enable ]
-# end
-
-#default is to turn everything off
-#execute "ufw default deny"
+package "ufw"
 
 firewall "ufw" do
-  action :nothing
+  action :enable
+end
+
+#leave this on by default
+firewall_rule "ssh" do
+  port 22
+  action :allow
 end
 
 node['firewall']['rules'].each do |rule_mash|
@@ -54,7 +51,6 @@ node['firewall']['rules'].each do |rule_mash|
       source params['source'] if params['source']
       destination params['destination'] if params['destination']
       action act
-      notifies :enable, "firewall[ufw]"
     end
   end
 end
