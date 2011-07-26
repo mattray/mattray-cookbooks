@@ -29,6 +29,10 @@
 #default is to turn everything off
 #execute "ufw default deny"
 
+firewall "ufw" do
+  action :nothing
+end
+
 node['firewall']['rules'].each do |rule_mash|
   Chef::Log.debug "ufw:rule \"#{rule_mash}\""
   rule_mash.keys.each do |rule|
@@ -40,19 +44,18 @@ node['firewall']['rules'].each do |rule_mash|
     Chef::Log.debug "ufw:rule:port #{params['port']}" if params['port']
     Chef::Log.debug "ufw:rule:source #{params['source']}" if params['source']
     Chef::Log.debug "ufw:rule:destination #{params['destination']}" if params['destination']
-    Chef::Log.debug "ufw:rule:action :#{params['action']}" if params['action']
+    act = params['action']
+    act ||= "allow"
+    Chef::Log.debug "ufw:rule:action :#{act}" 
     firewall_rule rule do
       name params['name'] if params['name']
       protocol params['protocol'] if params['protocol']
       port params['port'] if params['port']
       source params['source'] if params['source']
       destination params['destination'] if params['destination']
-      action ":#{params['action']}" if params['action']
+      action act
       notifies :enable, "firewall[ufw]"
     end
   end
 end
 
-firewall "ufw" do
-  action :nothing
-end
