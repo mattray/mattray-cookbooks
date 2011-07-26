@@ -37,10 +37,11 @@ def run_list_names(run_list)
   return names
 end
 
-fw_db = data_bag('firewall')
-
-rlist = run_list_names(node.run_list).uniq!
+rlist = run_list_names(node.run_list)
+rlist.uniq!
 Chef::Log.debug "ufw::securitylevels:rlist: #{rlist}"
+
+fw_db = data_bag('firewall')
 
 rlist.each do |entry|
   Chef::Log.info "ufw::securitylevels: \"#{entry}\""
