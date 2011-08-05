@@ -57,7 +57,7 @@ Data Bags
 If you are using security levels, the `firewall` data bag will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Either roles or recipes may be keys (role[webserver] is 'webserver', recipe[apache2] is 'apache2'). If you have recipe-specific firewall rules, you will need to replace the '::' with '__' (double underscores) (eg. recipe[apache2::mod_ssl] is 'apache2__mod_ssl' in the data bag item). Within the item, there will be a keys corresponding to security levels (ie. 'green', 'red', 'yellow'). These keys will contain hashes to apply to the `['firewall']['rules']` attribute.
 
     % knife data bag create firewall
-    % knife data bag from file firewall examples/data_bags/apache2.json
+    % knife data bag from file firewall examples/data_bags/firewall/apache2.json
 
 # Example 'firewall' data bag item
 
@@ -87,58 +87,12 @@ If you are using security levels, the `firewall` data bag will contain items tha
 
 Resources/Providers
 ===================
-rule
-----
-# Actions
-- :allow: adds the specified rule to the `['firewall']['rules']` list of the node. Default.
-- :deny: adds the specified rule to the `['firewall']['rules']` list of the node as a DENY rule.
-- :reject: adds the specified rule to the `['firewall']['rules']` list of the node as a REJECT rule.
-
-# Attribute Parameters
-- rule: name attribute. If only parameter, service name is assumed.
-- port: port number to use. Optional.
-- dest_port: destination port number to use. Optional.
-- protocol: tcp or udp. Optional.
-- direction: 'INPUT', 'OUTPUT' or 'FORWARD'. Optional, defaults to incoming traffic.
-- source: ip address or subnet. (ie. '10.0.10.12' or '192.168.1.0/24'. Optional.
-- dest: ip address or subnet. (ie. '10.0.10.12' or '192.168.1.0/24'. Optional.
-- order: inserts the rule at a position. Optional, defaults to inserting at top of list so rules get inserted in run list ordering.
-- interface: optional, defaults to all interfaces.
-
-# Examples
-    firewall_rule "tftp" do
-       notifies :enable, "firewall[ufw]"
-    end
-
-    firewall_rule "tomcat" do
-       port "8080"
-       action :allow
-       notifies :enable, "firewall[ufw]"
-    end
-
-    firewall_rule "block tomcat from 192.168.1.0/24" do
-       port "8080"
-       source "192.168.1.0/24"
-       action :deny
-       notifies :enable, "firewall[ufw]"
-    end
-
-    firewall_rule "Allow access to udp 1.2.3.4 port 5469 from 1.2.3.5 port 5469" do
-       protocol "udp"
-       port "5469"
-       source "1.2.3.4"
-       destination "1.2.3.5"
-       dest_port "5469"
-       action :allow
-       notifies :enable, "firewall[ufw]"
-    end
-
-    firewall "ufw" do
-      action :nothing
-    end
+The `firewall` cookbook provides the `firewall_rule` LWRP, for which there is a ufw provider.
 
 Limitations
 ===========
+http://tickets.opscode.com/secure/IssueNavigator.jspa?reset=true&mode=hide&jqlQuery=component+%3D+firewall+AND+project+%3D+COOK
+
 Logging and limiting are not yet supported. Logging will be added next.
 
 License and Author
