@@ -20,38 +20,56 @@
 
 package "ufw"
 
+old_state = node['firewall']['state']
+new_state = node['firewall']['rules'].to_s
+Chef::Log.info "Old firewall state:#{old_state}"
+Chef::Log.info "New firewall state:#{new_state}"
+
 firewall "ufw" do
   action :enable
 end
 
-#leave this on by default
-firewall_rule "ssh" do
-  port 22
-  action :allow
-end
+#check to see if the firewall rules changed
+if old_state == new_state
+  Chef::Log.info "Firewall rules unchanged."
+else
+  Chef::Log.info "Firewall rules reset."
+  node['firewall']['state'] = new_state
+  
+  #drop rules and re-enable
+  execute "ufw --force reset" do
+    notifies :enable, "firewall[ufw]", :immediately
+  end
+  
+  #leave this on by default
+  firewall_rule "ssh" do
+    port 22
+    action :allow
+  end
 
-node['firewall']['rules'].each do |rule_mash|
-  Chef::Log.debug "ufw:rule \"#{rule_mash}\""
-  rule_mash.keys.each do |rule|
-    Chef::Log.debug "ufw:rule:name \"#{rule}\""
-    params = rule_mash[rule]
-    Chef::Log.debug "ufw:rule:parameters \"#{params}\""
-    Chef::Log.debug "ufw:rule:name #{params['name']}" if params['name']
-    Chef::Log.debug "ufw:rule:protocol #{params['protocol']}" if params['protocol']
-    Chef::Log.debug "ufw:rule:port #{params['port']}" if params['port']
-    Chef::Log.debug "ufw:rule:source #{params['source']}" if params['source']
-    Chef::Log.debug "ufw:rule:destination #{params['destination']}" if params['destination']
-    act = params['action']
-    act ||= "allow"
-    Chef::Log.debug "ufw:rule:action :#{act}" 
-    firewall_rule rule do
-      name params['name'] if params['name']
-      protocol params['protocol'] if params['protocol']
-      port params['port'] if params['port']
-      source params['source'] if params['source']
-      destination params['destination'] if params['destination']
-      action act
+  node['firewall']['rules'].each do |rule_mash|
+    Chef::Log.debug "ufw:rule \"#{rule_mash}\""
+    rule_mash.keys.each do |rule|
+      Chef::Log.debug "ufw:rule:name \"#{rule}\""
+      params = rule_mash[rule]
+      Chef::Log.debug "ufw:rule:parameters \"#{params}\""
+      Chef::Log.debug "ufw:rule:name #{params['name']}" if params['name']
+      Chef::Log.debug "ufw:rule:protocol #{params['protocol']}" if params['protocol']
+      Chef::Log.debug "ufw:rule:port #{params['port']}" if params['port']
+      Chef::Log.debug "ufw:rule:source #{params['source']}" if params['source']
+      Chef::Log.debug "ufw:rule:destination #{params['destination']}" if params['destination']
+      act = params['action']
+      act ||= "allow"
+      Chef::Log.debug "ufw:rule:action :#{act}" 
+      firewall_rule rule do
+        name params['name'] if params['name']
+        protocol params['protocol'] if params['protocol']
+        port params['port'] if params['port']
+        source params['source'] if params['source']
+        destination params['destination'] if params['destination']
+        action act
+      end
     end
   end
+  
 end
-
