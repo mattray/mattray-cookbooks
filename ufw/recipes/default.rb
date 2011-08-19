@@ -22,8 +22,8 @@ package "ufw"
 
 old_state = node['firewall']['state']
 new_state = node['firewall']['rules'].to_s
-Chef::Log.info "Old firewall state:#{old_state}"
-Chef::Log.info "New firewall state:#{new_state}"
+Chef::Log.debug "Old firewall state:#{old_state}"
+Chef::Log.debug "New firewall state:#{new_state}"
 
 firewall "ufw" do
   action :enable
@@ -33,11 +33,12 @@ end
 if old_state == new_state
   Chef::Log.info "Firewall rules unchanged."
 else
-  Chef::Log.info "Firewall rules reset."
+  Chef::Log.info "Firewall rules updated."
   node['firewall']['state'] = new_state
   
   #drop rules and re-enable
-  execute "ufw --force reset" do
+  firewall "ufw" do
+    action :reset
     notifies :enable, "firewall[ufw]", :immediately
   end
   
