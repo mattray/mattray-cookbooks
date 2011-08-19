@@ -44,7 +44,7 @@ Chef::Log.debug "ufw::securitylevels:rlist: #{rlist}"
 fw_db = data_bag('firewall')
 
 rlist.each do |entry|
-  Chef::Log.info "ufw::securitylevels: \"#{entry}\""
+  Chef::Log.debug "ufw::securitylevels: \"#{entry}\""
   if fw_db.member?(entry)
     #add the list of firewall rules to the current list
     item = data_bag_item('firewall', entry)
