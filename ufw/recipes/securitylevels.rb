@@ -42,6 +42,7 @@ rlist.uniq!
 Chef::Log.debug "ufw::securitylevels:rlist: #{rlist}"
 
 fw_db = data_bag('firewall')
+Chef::Log.debug "ufw::securitylevels:firewall:#{fw_db}"
 
 rlist.each do |entry|
   Chef::Log.debug "ufw::securitylevels: \"#{entry}\""
