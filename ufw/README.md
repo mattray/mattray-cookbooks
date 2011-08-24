@@ -14,6 +14,12 @@ default
 -------
 The `default` recipe looks for the list of firewall rules to apply from the `['firewall']['rules']` attribute added to roles and on the node itself. The list of rules is then applied to the node in the order specified.
 
+disable
+-------
+The `disable` recipe is used if there is a need to disable the existing firewall, perhaps for testing. It disables the ufw firewall even if other ufw recipes attempt to enable it.
+
+If you remove this recipe, the firewall does not get automatically re-enabled. You will need clear the value of the `['firewall']['state']` to force a recalculation of the firewall rules. This can be done with `knife node edit`.
+
 securitylevels
 --------------
 The `securitylevels` recipe looks in the `firewall` data bag for different security levels to apply firewall rules. There is a `['firewall']['securitylevel']` attribute used to key the 'firewall' data bag. The list of rules to apply is found by looking at the run list for keys that map to the data bag and applied in the the order specified.

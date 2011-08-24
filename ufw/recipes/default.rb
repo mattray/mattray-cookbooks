@@ -25,23 +25,23 @@ new_state = node['firewall']['rules'].to_s
 Chef::Log.debug "Old firewall state:#{old_state}"
 Chef::Log.debug "New firewall state:#{new_state}"
 
-firewall "ufw" do
-  action :enable
-end
-
-#check to see if the firewall rules changed
+#check to see if the firewall rules changed.
+#the rules are always changed the first run
 if old_state == new_state
   Chef::Log.info "Firewall rules unchanged."
 else
   Chef::Log.info "Firewall rules updated."
   node['firewall']['state'] = new_state
-  
+
   #drop rules and re-enable
   firewall "ufw" do
     action :reset
-    notifies :enable, "firewall[ufw]", :immediately
   end
-  
+
+  firewall "ufw" do
+    action :enable
+  end
+
   #leave this on by default
   firewall_rule "ssh" do
     port 22
@@ -61,7 +61,7 @@ else
       Chef::Log.debug "ufw:rule:destination #{params['destination']}" if params['destination']
       act = params['action']
       act ||= "allow"
-      Chef::Log.debug "ufw:rule:action :#{act}" 
+      Chef::Log.debug "ufw:rule:action :#{act}"
       firewall_rule rule do
         name params['name'] if params['name']
         protocol params['protocol'] if params['protocol']
@@ -72,5 +72,5 @@ else
       end
     end
   end
-  
+
 end
