@@ -56,6 +56,8 @@ else
       Chef::Log.debug "ufw:rule:parameters \"#{params}\""
       Chef::Log.debug "ufw:rule:name #{params['name']}" if params['name']
       Chef::Log.debug "ufw:rule:protocol #{params['protocol']}" if params['protocol']
+      Chef::Log.debug "ufw:rule:direction #{params['direction']}" if params['direction']
+      Chef::Log.debug "ufw:rule:interface #{params['interface']}" if params['interface']
       Chef::Log.debug "ufw:rule:port #{params['port']}" if params['port']
       Chef::Log.debug "ufw:rule:source #{params['source']}" if params['source']
       Chef::Log.debug "ufw:rule:destination #{params['destination']}" if params['destination']
@@ -67,6 +69,8 @@ else
       firewall_rule rule do
         name params['name'] if params['name']
         protocol params['protocol'] if params['protocol']
+        direction params['direction'] if params['direction']
+        interface params['interface'] if params['interface']
         port params['port'].to_i if params['port']
         source params['source'] if params['source']
         destination params['destination'] if params['destination']
