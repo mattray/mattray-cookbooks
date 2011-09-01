@@ -20,10 +20,11 @@ The `disable` recipe is used if there is a need to disable the existing firewall
 
 If you remove this recipe, the firewall does not get automatically re-enabled. You will need clear the value of the `['firewall']['state']` to force a recalculation of the firewall rules. This can be done with `knife node edit`.
 
-securitylevels
---------------
-The `securitylevels` recipe looks in the `firewall` data bag for different security levels to apply firewall rules. There is a `['firewall']['securitylevel']` attribute used to key the 'firewall' data bag. The list of rules to apply is found by looking at the run list for keys that map to the data bag and applied in the the order specified.
-The `securitylevels` recipe calls the `default` recipe after the `['firewall']['rules']` attribute is set to appy the rules, so you may mix roles with securitylevels if you want (roles apply first, then data bag contents).
+databag
+-------
+The `databag` recipe looks in the `firewall` data bag for to apply firewall rules based on inspecting the runlist for roles and recipe names for keys that map to the data bag items and are applied in the the order specified. 
+
+The `databag` recipe calls the `default` recipe after the `['firewall']['rules']` attribute is set to appy the rules, so you may mix roles with databag items if you want (roles apply first, then data bag contents).
 
 Attributes
 ==========
@@ -60,7 +61,9 @@ Roles and the node may have the `['firewall']['rules']` attribute set. This attr
 
 Data Bags
 =========
-If you are using security levels, the `firewall` data bag will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Either roles or recipes may be keys (role[webserver] is 'webserver', recipe[apache2] is 'apache2'). If you have recipe-specific firewall rules, you will need to replace the '::' with '__' (double underscores) (eg. recipe[apache2::mod_ssl] is 'apache2__mod_ssl' in the data bag item). Within the item, there will be a keys corresponding to security levels (ie. 'green', 'red', 'yellow'). These keys will contain hashes to apply to the `['firewall']['rules']` attribute.
+The `firewall` data bag may be used with the `databag` recipe. It will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Either roles or recipes may be keys (role[webserver] is 'webserver', recipe[apache2] is 'apache2'). If you have recipe-specific firewall rules, you will need to replace the '::' with '__' (double underscores) (eg. recipe[apache2::mod_ssl] is 'apache2__mod_ssl' in the data bag item). 
+
+The items in the data bag will contain a 'rules' array of hashes to apply to the `['firewall']['rules']` attribute.
 
     % knife data bag create firewall
     % knife data bag from file firewall examples/data_bags/firewall/apache2.json
@@ -69,12 +72,7 @@ If you are using security levels, the `firewall` data bag will contain items tha
 
     {
         "id": "apache2",
-        "green": [
-            {"http": {
-                "port": "80"
-            }}
-        ],
-        "red": [
+        "rules": [
             {"http": {
                 "port": "80"
             }},
@@ -83,23 +81,12 @@ If you are using security levels, the `firewall` data bag will contain items tha
                 "source": "192.168.1.0/24",
                 "action": "deny"
             }}
-        ],
-        "yellow": [
-            {"http": {
-                "port": "81"
-            }}
         ]
     }
 
 Resources/Providers
 ===================
-The `firewall` cookbook provides the `firewall_rule` LWRP, for which there is a ufw provider.
-
-Limitations
-===========
-http://tickets.opscode.com/secure/IssueNavigator.jspa?reset=true&mode=hide&jqlQuery=component+%3D+firewall+AND+project+%3D+COOK
-
-Logging and limiting are not yet supported. Logging will be added next.
+The `firewall` cookbook provides the `firewall` and `firewall_rule` LWRPs, for which there is a ufw provider.
 
 License and Author
 ==================

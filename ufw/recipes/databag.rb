@@ -1,7 +1,7 @@
 #
 # Author:: Matt Ray <matt@opscode.com>
 # Cookbook Name:: ufw
-# Recipe:: securitylevels
+# Recipe:: databag
 #
 # Copyright 2011, Opscode, Inc
 #
@@ -22,7 +22,7 @@
 def run_list_names(run_list)
   names = []
   run_list.each do |entry|
-    Chef::Log.debug "ufw::securitylevels:run_list_names+name: #{entry.name}"
+    Chef::Log.debug "ufw::databag:run_list_names+name: #{entry.name}"
     if entry.name.index('::') #cookbook::recipe
       names.push(entry.name.sub('::', '__'))
     else
@@ -33,24 +33,23 @@ def run_list_names(run_list)
       names.concat(run_list_names(rol.run_list))
     end
   end
-  Chef::Log.debug "ufw::securitylevels:run_list_names+names: #{names}"
+  Chef::Log.debug "ufw::databag:run_list_names+names: #{names}"
   return names
 end
 
 rlist = run_list_names(node.run_list)
 rlist.uniq!
-Chef::Log.debug "ufw::securitylevels:rlist: #{rlist}"
+Chef::Log.debug "ufw::databag:rlist: #{rlist}"
 
 fw_db = data_bag('firewall')
-Chef::Log.debug "ufw::securitylevels:firewall:#{fw_db}"
+Chef::Log.debug "ufw::databag:firewall:#{fw_db}"
 
 rlist.each do |entry|
-  Chef::Log.debug "ufw::securitylevels: \"#{entry}\""
+  Chef::Log.debug "ufw::databag: \"#{entry}\""
   if fw_db.member?(entry)
     #add the list of firewall rules to the current list
     item = data_bag_item('firewall', entry)
-    sl = node['firewall']['securitylevel']
-    rules = item[sl]
+    rules = item['rules']
     node['firewall']['rules'].concat(rules) unless rules.nil?
   end
 end

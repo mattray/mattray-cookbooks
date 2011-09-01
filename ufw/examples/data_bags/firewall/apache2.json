@@ -1,11 +1,6 @@
 {
     "id": "apache2",
-    "green": [
-        {"http": {
-            "port": "80"
-        }}
-    ],
-    "red": [
+    "rules": [
         {"http": {
             "port": "80"
         }},
@@ -13,11 +8,6 @@
             "port": "80",
             "source": "192.168.1.0/24",
             "action": "deny"
-        }}
-    ],
-    "yellow": [
-        {"http": {
-            "port": "81"
         }}
     ]
 }
