@@ -22,9 +22,36 @@ If you remove this recipe, the firewall does not get automatically re-enabled. Y
 
 databag
 -------
-The `databag` recipe looks in the `firewall` data bag for to apply firewall rules based on inspecting the runlist for roles and recipe names for keys that map to the data bag items and are applied in the the order specified. 
+The `databag` recipe looks in the `firewall` data bag for to apply firewall rules based on inspecting the runlist for roles and recipe names for keys that map to the data bag items and are applied in the the order specified.
 
 The `databag` recipe calls the `default` recipe after the `['firewall']['rules']` attribute is set to appy the rules, so you may mix roles with databag items if you want (roles apply first, then data bag contents).
+
+recipes
+-------
+The `recipes` recipe applies firewall rules based on inspecting the runlist for recipes that have node[<recipe>]['firewall']['rules'] attributes. These are appended to node['firewall']['rules'] and applied to the node. Cookbooks may define attributes for recipes like so:
+
+# attributes/default.rb for test cookbook
+    default['test']['firewall']['rules'] = [
+      "test"=> {
+        "port"=> "27901",
+        "protocol"=> "udp"
+      }
+    ]
+    default['test::awesome']['firewall']['rules'] = [
+      "awesome"=> {
+        "port"=> "99427",
+        "protocol"=> "udp"
+      },
+      "awesome2"=> {
+        "port"=> "99428"
+      }
+    ]
+
+Note that the 'test::awesome' rules are only applied if that specific recipe is in the runlist. Recipe-applied firewall rules are applied after any rules defined in role attributes.
+
+securitylevel
+-------------
+The `securitylevel` recipe is used if there are any node['firewall']['securitylevel'] settings that need to be enforced. It is a reference implementation with nothing configured.
 
 Attributes
 ==========
@@ -61,7 +88,7 @@ Roles and the node may have the `['firewall']['rules']` attribute set. This attr
 
 Data Bags
 =========
-The `firewall` data bag may be used with the `databag` recipe. It will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Either roles or recipes may be keys (role[webserver] is 'webserver', recipe[apache2] is 'apache2'). If you have recipe-specific firewall rules, you will need to replace the '::' with '__' (double underscores) (eg. recipe[apache2::mod_ssl] is 'apache2__mod_ssl' in the data bag item). 
+The `firewall` data bag may be used with the `databag` recipe. It will contain items that map to role names (eg. the 'apache' role will map to the 'apache' item in the 'firewall' data bag). Either roles or recipes may be keys (role[webserver] is 'webserver', recipe[apache2] is 'apache2'). If you have recipe-specific firewall rules, you will need to replace the '::' with '__' (double underscores) (eg. recipe[apache2::mod_ssl] is 'apache2__mod_ssl' in the data bag item).
 
 The items in the data bag will contain a 'rules' array of hashes to apply to the `['firewall']['rules']` attribute.
 
