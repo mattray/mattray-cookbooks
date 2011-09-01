@@ -34,9 +34,7 @@ else
   node['firewall']['state'] = new_state
 
   #drop rules and re-enable
-  firewall "ufw" do
-    action :reset
-  end
+  execute "ufw --force reset"
 
   firewall "ufw" do
     action :enable
@@ -69,10 +67,10 @@ else
       Chef::Log.debug "ufw:rule:action :#{act}"
       firewall_rule rule do
         name params['name'] if params['name']
-        protocol params['protocol'] if params['protocol']
-        direction params['direction'] if params['direction']
+        protocol params['protocol'].to_sym if params['protocol']
+        direction params['direction'].to_sym if params['direction']
         interface params['interface'] if params['interface']
-        logging params['logging'] if params['logging']
+        logging params['logging'].to_sym if params['logging']
         port params['port'].to_i if params['port']
         source params['source'] if params['source']
         destination params['destination'] if params['destination']
