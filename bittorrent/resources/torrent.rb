@@ -1,7 +1,7 @@
 #
 # Author:: Matt Ray (<matt@opscode.com>)
 # Cookbook Name:: bittorrent
-# Resource:: create
+# Resource:: torrent
 #
 # Copyright:: 2011, Opscode, Inc <legal@opscode.com>
 #

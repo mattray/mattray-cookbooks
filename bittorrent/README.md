@@ -23,20 +23,19 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
 - path: directory to for the download.
 - blocking: should the file be downloaded in a blocking way? If `true` Chef will download the file in a single Chef run, if `false` will start the download and continue seeding in the background. Default is `true`.
 - continue_seeding: should the file continue to be seeded to the swarm after download? Default is `false`.
-- dht_entry_point: HOST:PORT for initializing trackerless transfers with DHT.
 - dht_listen_port: UDP port or ports to listen for DHT. Default is "6881-6999".
 - listen_port: TCP port or ports to listen for incoming peers. Default is "6881-6999".
 - upload_limit: maximum upload speed limit in kilobytes/sec.
 
 # Examples
     # download the lucid iso
-    bittorrent_peer "http://releases.ubuntu.com/lucid/ubuntu-10.04.1-server-i386.iso.torrent" do
+    bittorrent_peer "http://releases.ubuntu.com/lucid/ubuntu-10.04.3-server-i386.iso.torrent" do
       path "/home/ubuntu/"
       action :create
     end
     
     # do the same thing but continue seeding after download
-    bittorrent_peer "http://releases.ubuntu.com/lucid/ubuntu-10.04.1-server-i386.iso.torrent" do
+    bittorrent_peer "http://releases.ubuntu.com/lucid/ubuntu-10.04.3-server-i386.iso.torrent" do
       path "/home/ubuntu/"
       continue_seeding true
       action :create
@@ -46,7 +45,6 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
     bittorrent_peer "/tmp/bigpackage.torrent" do
       path "/tmp/"
       continue_seeding true
-      dht_entry_point "10.0.111.10:6881"
       dht_listen_port "6881"
       listen_port "6882"
       upload_limit 1024
@@ -58,38 +56,39 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
       action :stop
     end
 
-bittorrent_create
------------------
+bittorrent_torrent
+------------------
 Create a .torrent file for sharing a local file or directory via the [BitTorrent protocol](http://en.wikipedia.org/wiki/BitTorrent). You can use the `bittorrent_seed` LWRP to share the .torrent after it is created.
 
 # Actions
-- :create: Create a .torrent for sharing a local file via the BitTorrent protocol.
+- :create: Generate a .torrent for sharing a local file via the BitTorrent protocol.
 
 # Attribute Parameters
-- torrent: torrent file to create. Local file path. Name attribute.
+- torrent: torrent file to generate. Local file path. Name attribute.
 - path: path of the source file or directory.
 - tracker: tracker or trackers to list.
-- group: group owner of the .torrent file (string or id).
-- mode: mode of the .torrent file.
-- owner: owner for the .torrent file.
+- owner: owner of the generated .torrent file.
+- group: group of the generated .torrent file.
+- mode: mode of the generated .torrent file.
 
 # Example
     # create a torrent for the the lucid iso
-    bittorrent_create "/home/ubuntu/ubuntu.iso.torrent" do
+    bittorrent_torrent "/home/ubuntu/ubuntu.iso.torrent" do
       path "/home/ubuntu/ubuntu.iso"
+      tracker "http://mytracker.example.com:6969/announce"
       action :create
     end
 
     # create a torrent for using trackerless with DHT
-    bittorrent_create "/tmp/bigpackage.torrent" do
+    bittorrent_torrent "/tmp/bigpackage.torrent" do
       path "/tmp/bigpackage"
-      tracker "node://10.0.111.3:6881/"
+      tracker "node://10.0.111.3:6881"
       action :create
     end
 
 bittorrent_seed
 ---------------
-Share a local file via the [BitTorrent protocol](http://en.wikipedia.org/wiki/BitTorrent) and a .torrent. You can use the `bittorrent_create` LWRP to create the .torrent file.
+Share a local file via the [BitTorrent protocol](http://en.wikipedia.org/wiki/BitTorrent) and a .torrent. You can use the `bittorrent_torrent` LWRP to create the .torrent file.
 
 # Actions
 - :create: Seed a local file from a .torrent and share it via BitTorrent.
@@ -104,7 +103,7 @@ Share a local file via the [BitTorrent protocol](http://en.wikipedia.org/wiki/Bi
 
 # Examples
     # share the lucid iso
-    bittorrent_seed "http://releases.ubuntu.com/lucid/ubuntu-10.04.1-server-i386.iso.torrent" do
+    bittorrent_seed "http://releases.ubuntu.com/lucid/ubuntu-10.04.3-server-i386.iso.torrent" do
       path "/home/ubuntu/"
       action :create
     end
@@ -159,3 +158,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+
+test range of ports, same command for everything: FAIL
+aria2c -V --summary-interval=0 --seed-ratio=0.0 --dht-file-path=/tmp/dht.dat --dht-listen-port 6881-6900 --listen-port 6881-6900 -d/home/mray fnm3.torrent

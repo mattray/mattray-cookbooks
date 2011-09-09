@@ -1,6 +1,10 @@
-maintainer       "YOUR_COMPANY_NAME"
-maintainer_email "YOUR_EMAIL"
-license          "All rights reserved"
-description      "Installs/Configures bittorrent"
-long_description IO.read(File.join(File.dirname(__FILE__), 'README.rdoc'))
-version          "0.0.1"
+maintainer       "Opscode, Inc."
+maintainer_email "matt@opscode.com"
+license          "Apache 2.0"
+description      "Manages use of BitTorrent for file distribution."
+long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
+version          "0.1.0"
+
+%w{ ubuntu }.each do |os|
+  supports os
+end

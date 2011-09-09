@@ -18,21 +18,15 @@
 # limitations under the License.
 #
 
-package "mktorrent"
-
-#make the torrent
-#mktorrent -a node://10.0.111.3:6881/ -o centos3.torrent CentOS-5.6-i386-bin-DVD.iso
-
 #split out the dht_listen_port first entry.
 #could be "123", "123-234", "123,456"
-dht_port =
+dht_port = node['bittorrent']['dht_listen_port']
 
 # create a torrent for using trackerless with DHT
-bittorrent_create node['bittorrent']['torrent'] do
+bittorrent_torrent node['bittorrent']['torrent'] do
   path node['bittorrent']['file']
   tracker "node://#{node.ipaddress}:#{dht_port}"
   action :create
-  #provider will check for existing file
 end
 
 package "aria2"
@@ -48,8 +42,5 @@ bittorrent_seed node['bittorrent']['torrent'] do
   dht_listen_port node['bittorrent']['dht_listen_port']
   listen_port node['bittorrent']['listen_port']
   action :create
-  #provider will check for running torrent
 end
 
-#seed
-#aria2c -V --summary-interval=0 --seed-ratio=0.0 --dht-file-path=/tmp/dht.dat --dht-listen-port 6881 --listen-port 6882 centos3.torrent

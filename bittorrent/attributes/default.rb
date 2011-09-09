@@ -18,6 +18,8 @@
 # limitations under the License.
 #
 
+default[:bittorrent][:seed] = false
+
 default[:bittorrent][:file] = ""
 default[:bittorrent][:path] = "/tmp"
 default[:bittorrent][:torrent] = "/tmp/my.torrent"
