@@ -23,7 +23,6 @@ require 'chef/mixin/shell_out'
 include Chef::Mixin::Checksum
 include Chef::Mixin::ShellOut
 
-
 action :create do
   torrent = new_resource.torrent
   package("mktorrent") { action :nothing }.run_action(:install)
@@ -39,11 +38,13 @@ action :create do
     if existing_hash.eql?(test_hash)
       Chef::Log.debug "Torrent #{torrent} exists and unchanged."
       file test_torrent do
+        backup false
         action :delete
       end
     else
       Chef::Log.info "Replacing existing torrent #{torrent} from #{new_resource.path}."
       file torrent do
+        backup false
         action :delete
       end
       execute "mv #{test_torrent} #{torrent}"
