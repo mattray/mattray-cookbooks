@@ -27,6 +27,5 @@ default[:bittorrent][:torrent] = "/tmp/my.torrent"
 default[:bittorrent][:config_file] = "/etc/aria2.conf"
 default[:bittorrent][:logfile] = "/var/log/bittorrent.log"
 
-default[:bittorrent][:dht_listen_port] = "6881-6890"
-default[:bittorrent][:listen_port] = "6881-6890"
+default[:bittorrent][:port] = 6881
 default[:bittorrent][:upload_limit] = 0 #0 is unlimited

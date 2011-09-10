@@ -22,8 +22,7 @@ actions :create, :stop
 
 attribute :torrent, :kind_of => String, :name_attribute => true
 attribute :path, :kind_of => String
+attribute :port, :kind_of => Integer, :default => 6881
 attribute :blocking, :default => true
 attribute :continue_seeding, :default => false
-attribute :dht_listen_port, :kind_of => String, :default => "6881-6999"
-attribute :listen_port, :kind_of => String, :default => "6881-6999"
 attribute :upload_limit, :kind_of => Integer
