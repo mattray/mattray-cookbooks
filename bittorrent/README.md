@@ -8,6 +8,10 @@ Platform
 --------
 Tested with Ubuntu 10.04 and 11.04. Uses the `aria2` and `mktorrent` packages.
 
+Networking
+----------
+For torrentless trackers you must have both TCP and UDP open on the firewall for whatever port you may be using. For simplicity and efficiency only a single port is supported (DHT uses UDP and transfers use TCP). EC2 instances can communicate between each other as long as they are in the same security group.
+
 Resource/Provider
 =================
 bittorrent_peer
@@ -21,11 +25,11 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
 # Attribute Parameters
 - torrent: torrent file of the swarm to join. Can either be a url or local file path.
 - path: directory to for the download.
-- blocking: should the file be downloaded in a blocking way? If `true` Chef will download the file in a single Chef run, if `false` will start the download and continue seeding in the background. Default is `true`.
-- continue_seeding: should the file continue to be seeded to the swarm after download? Default is `false`.
-- dht_listen_port: UDP port or ports to listen for DHT. Default is "6881-6999".
-- listen_port: TCP port or ports to listen for incoming peers. Default is "6881-6999".
-- upload_limit: maximum upload speed limit in kilobytes/sec.
+- port: listening port for peers. (default 6881)
+- seeder: hostname or address of the seeder if the torrent does not have a tracker. (optional)
+- blocking: should the file be downloaded in a blocking way? If `true` Chef will download the file in a single Chef run, if `false` will start the download and continue seeding in the background. (default true)
+- continue_seeding: should the file continue to be seeded to the swarm after download? (default false)
+- upload_limit: maximum upload speed limit in kilobytes/sec. (optional)
 
 # Examples
     # download the lucid iso
@@ -44,9 +48,8 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
     # peer a trackerless local torrent with a megabyte limit
     bittorrent_peer "/tmp/bigpackage.torrent" do
       path "/tmp/"
+      seeder "10.0.111.3"
       continue_seeding true
-      dht_listen_port "6881"
-      listen_port "6882"
       upload_limit 1024
       action :create
     end
@@ -66,10 +69,10 @@ Create a .torrent file for sharing a local file or directory via the [BitTorrent
 # Attribute Parameters
 - torrent: torrent file to generate. Local file path. Name attribute.
 - path: path of the source file or directory.
-- tracker: tracker or trackers to list.
-- owner: owner of the generated .torrent file.
-- group: group of the generated .torrent file.
-- mode: mode of the generated .torrent file.
+- tracker: tracker or trackers to list. (optional)
+- owner: owner of the generated .torrent file. (optional)
+- group: group of the generated .torrent file. (optional)
+- mode: mode of the generated .torrent file. (optional)
 
 # Example
     # create a torrent for the the lucid iso
@@ -82,7 +85,7 @@ Create a .torrent file for sharing a local file or directory via the [BitTorrent
     # create a torrent for using trackerless with DHT
     bittorrent_torrent "/tmp/bigpackage.torrent" do
       path "/tmp/bigpackage"
-      tracker "node://10.0.111.3:6881"
+      tracker "node://#{node.ipaddress}:#{node['bittorrent']['port']}"
       action :create
     end
 
@@ -97,9 +100,8 @@ Share a local file via the [BitTorrent protocol](http://en.wikipedia.org/wiki/Bi
 # Attribute Parameters
 - torrent: torrent file of the swarm to join. Can either be a url or local file path.
 - path: directory to for the download.
-- dht_listen_port: UDP port or ports to listen for DHT. Default is "6881-6999".
-- listen_port: TCP port or ports to listen for incoming peers. Default is "6881-6999".
-- upload_limit: maximum upload speed limit in kilobytes/sec.
+- port: listening port for peers. (default 6881)
+- upload_limit: maximum upload speed limit in kilobytes/sec. (optional)
 
 # Examples
     # share the lucid iso
@@ -111,8 +113,6 @@ Share a local file via the [BitTorrent protocol](http://en.wikipedia.org/wiki/Bi
     # seed a trackerless local torrent with a megabyte limit
     bittorrent_seed "/tmp/bigpackage.torrent" do
       path "/tmp/"
-      dht_listen_port "6881"
-      listen_port "6882"
       upload_limit 1024
       action :create
     end
