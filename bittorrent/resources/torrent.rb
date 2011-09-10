@@ -22,7 +22,7 @@ actions :create
 
 attribute :torrent, :kind_of => String, :name_attribute => true
 attribute :path, :kind_of => String
-attribute :tracker, :kind_of => String
+attribute :tracker, :kind_of => String, :default => "''"
 attribute :owner, :regex => Chef::Config[:user_valid_regex]
 attribute :group, :regex => Chef::Config[:group_valid_regex]
 attribute :mode, :kind_of => String
