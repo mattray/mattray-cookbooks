@@ -32,17 +32,18 @@ action :create do
     test_torrent = "#{Chef::Config[:file_cache_path]}/#{::File.basename(torrent)}"
     shell_out("mktorrent -d -c \"Generated with Chef\" -a #{new_resource.tracker} -o #{test_torrent} #{new_resource.path}")
     existing_hash = checksum(torrent)
-    Chef::Log.debug "Existing hash: #{existing_hash}"
+    Chef::Log.debug "Old hash: #{existing_hash}"
     test_hash = checksum(test_torrent)
-    Chef::Log.debug "Test hash: #{test_hash}"
+    Chef::Log.debug "New hash: #{test_hash}"
     if existing_hash.eql?(test_hash)
-      Chef::Log.debug "Torrent #{torrent} exists and unchanged."
+      Chef::Log.info "Torrent #{torrent} validated and is unchanged."
       file test_torrent do
         backup false
         action :delete
       end
+      new_resource.updated_by_last_action(false)
     else
-      Chef::Log.info "Replacing existing torrent #{torrent} from #{new_resource.path}."
+      Chef::Log.info "Replacing existing torrent #{torrent} for #{new_resource.path}."
       file torrent do
         backup false
         action :delete
@@ -51,7 +52,7 @@ action :create do
       new_resource.updated_by_last_action(true)
     end
   else
-    Chef::Log.info "Creating new torrent #{torrent} from #{new_resource.path}."
+    Chef::Log.info "Creating new torrent #{torrent} for #{new_resource.path}."
     execute "mktorrent -d -c \"Generated with Chef\" -a #{new_resource.tracker} -o #{torrent} #{new_resource.path}"
     new_resource.updated_by_last_action(true)
   end
