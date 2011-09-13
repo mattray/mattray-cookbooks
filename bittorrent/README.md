@@ -101,7 +101,7 @@ Share a local file via the [BitTorrent protocol](http://en.wikipedia.org/wiki/Bi
 - torrent: torrent file of the swarm to join. Can either be a url or local file path.
 - path: directory to for the download.
 - port: listening port for peers. (default 6881)
-- upload_limit: maximum upload speed limit in kilobytes/sec. (optional)
+- upload_limit: maximum upload speed limit in megabytes/sec. (optional)
 
 # Examples
     # share the lucid iso
@@ -113,7 +113,7 @@ Share a local file via the [BitTorrent protocol](http://en.wikipedia.org/wiki/Bi
     # seed a trackerless local torrent with a megabyte limit
     bittorrent_seed "/tmp/bigpackage.torrent" do
       path "/tmp/"
-      upload_limit 1024
+      upload_limit 1
       action :create
     end
 
