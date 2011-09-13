@@ -18,24 +18,60 @@
 # limitations under the License.
 #
 
-#actions :create, :stop
-
 # attribute :torrent, :kind_of => String, :name_attribute => true
 # attribute :path, :kind_of => String
-# attribute :dht_listen_port, :kind_of => String, :default => "6881-6999"
-# attribute :listen_port, :kind_of => String, :default => "6881-6999"
-# attribute :upload_limit, :kind_of => Integer
+# attribute :port, :kind_of => Integer, :default => 6881
+# attribute :upload_limit, :kind_of => Integer, :default => 0
 
-#provider will check for running torrent
+require 'chef/shell_out'
 
+#start seeding if not already doing so
+action :create do
+  torrentfile = new_resource.torrent
+  torrent = ::File.basename(torrentfile)
+  if running?
+    Chef::Log.info "Torrent #{torrentfile} for #{new_resource.path} already seeding."
+    new_resource.updated_by_last_action(false)
+  else
+    package("aria2") { action :nothing }.run_action(:install)
+    command = "aria2c -D -V --seed-ratio=0.0 --log-level=notice "
+    command += "-l /tmp/#{torrent}.log "
+    command += "--dht-file-path=/tmp/#{torrent}-dht.dat "
+    if new_resource.upload_limit
+      #multiply by 1024^2 to do megabytes
+      command += "--max-overall-upload-limit=#{new_resource.upload_limit * 1024*1024} "
+    end
+    command += "--dht-listen-port #{new_resource.port} "
+    command += "--listen-port #{new_resource.port} "
+    command += "-d#{new_resource.path} #{torrentfile}"
+    execute command
+    new_resource.updated_by_last_action(true)
+  end
+end
 
+#kill the process if running
+action :stop do
+  torrentfile = new_resource.torrent
+  torrent = ::File.basename(torrentfile)
+  if running?
+    execute "pkill -f #{torrent}"
+    new_resource.updated_by_last_action(true)
+    Chef::Log.info "Torrent #{torrentfile} stopped."
+  else
+    Chef::Log.debug "Torrent #{torrentfile} is already stopped."
+    new_resource.updated_by_last_action(false)
+  end
+end
 
-#open up the torrent and ensure that the files exist
-# centos5: removed trailing '/', try not using --dht-start WORKS!
-# aria2c --summary-interval=0 --seed-ratio=0.0 --dht-file-path=/tmp/dht.dat --dht-listen-port 6881 --listen-port 6882 centos5.torrent
-
-# test -d option
-# aria2c -V --summary-interval=0 --seed-ratio=0.0 --dht-file-path=/tmp/dht.dat --dht-listen-port 6881 --listen-port 6882 -d/home/mray fnm1.torrent
-# aria2c --summary-interval=0 --seed-ratio=0.0 --dht-file-path=/tmp/dht.dat --dht-listen-port 6881 --listen-port 6882 -d/home/mray fnm1.torrent
-# aria2c -V --summary-interval=0 --seed-ratio=0.0 --dht-file-path=/tmp/dht.dat --dht-listen-port 6881 --listen-port 6882 -d/home/mray fnm1.torrent
-# WORKS!
+#check if the process is currently running
+def running?
+  torrent = ::File.basename(new_resource.torrent)
+  cmd = Chef::ShellOut.new("pgrep -f #{torrent}")
+  pgrep = cmd.run_command 
+  Chef::Log.debug "Output of 'pgrep -f #{torrent}' is #{pgrep.stdout}."
+  if pgrep.stdout.length == 0
+    return false
+  else
+    return true
+  end
+end
