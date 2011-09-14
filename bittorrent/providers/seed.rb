@@ -49,7 +49,7 @@ action :create do
   end
 end
 
-#kill the process if running
+#kill the process if running and remove the dht file
 action :stop do
   torrentfile = new_resource.torrent
   torrent = ::File.basename(torrentfile)
@@ -60,6 +60,10 @@ action :stop do
   else
     Chef::Log.debug "Torrent #{torrentfile} is already stopped."
     new_resource.updated_by_last_action(false)
+  end
+  file "/tmp/#{torrent}-dht.dat" do
+    backup false
+    action :delete
   end
 end
 
