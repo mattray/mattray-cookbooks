@@ -29,7 +29,7 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
 - seeder: hostname or address of the seeder if the torrent does not have a tracker. (optional)
 - blocking: should the file be downloaded in a blocking way? If `true` Chef will download the file in a single Chef run, if `false` will start the download and continue seeding in the background. (default true)
 - continue_seeding: should the file continue to be seeded to the swarm after download? (default false)
-- upload_limit: maximum upload speed limit in kilobytes/sec. (optional)
+- upload_limit: maximum upload speed limit in megabytes/sec. (optional)
 
 # Examples
     # download the lucid iso
@@ -50,7 +50,7 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
       path "/tmp/"
       seeder "10.0.111.3"
       continue_seeding true
-      upload_limit 1024
+      upload_limit 1
       action :create
     end
 
