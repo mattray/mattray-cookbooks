@@ -44,11 +44,15 @@ action :create do
       new_resource.updated_by_last_action(false)
     else
       Chef::Log.info "Replacing existing torrent #{torrent} for #{new_resource.path}."
-      file torrent do
+      ruby_block "copying new torrent over existing" do
+        block do
+          ::FileUtils.copy(test_torrent,torrent)
+        end
+      end
+      file test_torrent do
         backup false
         action :delete
       end
-      execute "mv #{test_torrent} #{torrent}"
       new_resource.updated_by_last_action(true)
     end
   else
