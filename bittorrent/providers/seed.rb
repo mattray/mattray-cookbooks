@@ -67,11 +67,11 @@ action :stop do
   end
 end
 
-#check if the process is currently running
+#check if the torrent process is currently running
 def running?
   torrent = ::File.basename(new_resource.torrent)
   cmd = Chef::ShellOut.new("pgrep -f #{torrent}")
-  pgrep = cmd.run_command 
+  pgrep = cmd.run_command
   Chef::Log.debug "Output of 'pgrep -f #{torrent}' is #{pgrep.stdout}."
   if pgrep.stdout.length == 0
     return false
