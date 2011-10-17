@@ -16,7 +16,7 @@ Resource/Provider
 =================
 bittorrent_peer
 ---------------
-Download the file or files specified by a torrent via the [BitTorrent protocol](http://en.wikipedia.org/wiki/BitTorrent).
+Download the file or files specified by a torrent via the [BitTorrent protocol](http://en.wikipedia.org/wiki/BitTorrent). Update notifications are triggered when a blocking download completes and on the initiation of seeding.
 
 # Actions
 - :create: Download the contents of a torrent via the BitTorrent protocol
@@ -27,8 +27,8 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
 - path: directory to for the download.
 - port: listening port for peers. (default 6881)
 - seeder: hostname or address of the seeder if the torrent does not have a tracker. (optional)
-- blocking: should the file be downloaded in a blocking way? If `true` Chef will download the file in a single Chef run, if `false` will start the download and continue seeding in the background. (default true)
-- continue_seeding: should the file continue to be seeded to the swarm after download? (default false)
+- blocking: should the file be downloaded in a blocking way? If `true` Chef will download the file in a single Chef run, if `false` will start the download and continue in the background (and based on `continue_seeding` stop or continue when finished). (default true)
+- continue_seeding: should the file continue to be seeded to the swarm after download? You will need to use the :stop action to stop it. (default false)
 - upload_limit: maximum upload speed limit in megabytes/sec. (optional)
 
 # Examples
@@ -37,7 +37,7 @@ Download the file or files specified by a torrent via the [BitTorrent protocol](
       path "/home/ubuntu/"
       action :create
     end
-    
+
     # do the same thing but continue seeding after download
     bittorrent_peer "http://releases.ubuntu.com/lucid/ubuntu-10.04.3-server-i386.iso.torrent" do
       path "/home/ubuntu/"
@@ -109,7 +109,7 @@ Share a local file via the [BitTorrent protocol](http://en.wikipedia.org/wiki/Bi
       path "/home/ubuntu/"
       action :create
     end
-    
+
     # seed a trackerless local torrent with a megabyte limit
     bittorrent_seed "/tmp/bigpackage.torrent" do
       path "/tmp/"
