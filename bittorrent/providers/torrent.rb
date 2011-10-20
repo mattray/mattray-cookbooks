@@ -26,11 +26,11 @@ include Chef::Mixin::ShellOut
 action :create do
   torrent = new_resource.torrent
   package("mktorrent") { action :nothing }.run_action(:install)
-  #check if the file exists, check if it has changed 
+  #check if the file exists, check if it has changed
   if ::File.exists?(torrent)
     #generate a new version
     test_torrent = "#{Chef::Config[:file_cache_path]}/#{::File.basename(torrent)}"
-    shell_out("mktorrent -d -c \"Generated with Chef\" -a #{new_resource.tracker} -o #{test_torrent} #{new_resource.path}")
+    shell_out("mktorrent -t 4 -d -c \"Generated with Chef\" -a #{new_resource.tracker} -o #{test_torrent} #{new_resource.path}")
     existing_hash = checksum(torrent)
     Chef::Log.debug "Old hash: #{existing_hash}"
     test_hash = checksum(test_torrent)
@@ -41,7 +41,6 @@ action :create do
         backup false
         action :delete
       end
-      new_resource.updated_by_last_action(false)
     else
       Chef::Log.info "Replacing existing torrent #{torrent} for #{new_resource.path}."
       ruby_block "copying new torrent over existing" do
@@ -57,7 +56,7 @@ action :create do
     end
   else
     Chef::Log.info "Creating new torrent #{torrent} for #{new_resource.path}."
-    execute "mktorrent -d -c \"Generated with Chef\" -a #{new_resource.tracker} -o #{torrent} #{new_resource.path}"
+    execute "mktorrent -t 4 -d -c \"Generated with Chef\" -a #{new_resource.tracker} -o #{torrent} #{new_resource.path}"
     new_resource.updated_by_last_action(true)
   end
   file torrent do
