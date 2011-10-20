@@ -44,6 +44,7 @@ action :create do
     command += "--dht-listen-port #{new_resource.port} "
     command += "--listen-port #{new_resource.port} "
     command += "-d#{new_resource.path} #{torrentfile}"
+    torrentcleanup()
     execute command
     new_resource.updated_by_last_action(true)
   end
@@ -61,10 +62,7 @@ action :stop do
     Chef::Log.debug "Torrent #{torrentfile} is already stopped."
     new_resource.updated_by_last_action(false)
   end
-  file "/tmp/#{torrent}-dht.dat" do
-    backup false
-    action :delete
-  end
+  torrentcleanup()
 end
 
 #check if the torrent process is currently running
@@ -77,5 +75,18 @@ def running?
     return false
   else
     return true
+  end
+end
+
+#remove any existing dht or log files
+def torrentcleanup
+  torrent = ::File.basename(new_resource.torrent)
+  file "/tmp/#{torrent}.log" do
+    backup false
+    action :delete
+  end
+  file "/tmp/#{torrent}-dht.dat" do
+    backup false
+    action :delete
   end
 end
