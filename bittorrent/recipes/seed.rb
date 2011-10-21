@@ -18,29 +18,17 @@
 # limitations under the License.
 #
 
-#split out the dht_listen_port first entry.
-#could be "123", "123-234", "123,456"
-dht_port = node['bittorrent']['dht_listen_port']
-
 # create a torrent for using trackerless with DHT
 bittorrent_torrent node['bittorrent']['torrent'] do
-  path node['bittorrent']['file']
-  tracker "node://#{node.ipaddress}:#{dht_port}"
+  path node['bittorrent']['path']
+  tracker "node://#{node.ipaddress}:#{node['bittorrent']['port']}"
   action :create
-end
-
-package "aria2"
-
-template node['bittorrent']['config_file'] do
-  mode 0600
-  source "aria2.conf.erb"
 end
 
 #seed
 bittorrent_seed node['bittorrent']['torrent'] do
   path node['bittorrent']['path']
-  dht_listen_port node['bittorrent']['dht_listen_port']
-  listen_port node['bittorrent']['listen_port']
+  port node['bittorrent']['port']
+  upload_limit node['bittorrent']['upload_limit']
   action :create
 end
-

@@ -18,19 +18,9 @@
 # limitations under the License.
 #
 
-# actions :create, :stop
-
-# attribute :torrent, :kind_of => String, :name_attribute => true
-# attribute :path, :kind_of => String
-# attribute :port, :kind_of => Integer, :default => 6881
-# attribute :seeder, :kind_of => String
-# attribute :blocking, :default => true
-# attribute :continue_seeding, :default => false
-# attribute :upload_limit, :kind_of => Integer
-
 require 'chef/shell_out'
+include Chef::Mixin::ShellOut
 
-#start peering if not already doing so
 action :create do
   torrentfile = new_resource.torrent
   torrent = ::File.basename(torrentfile)
@@ -40,59 +30,71 @@ action :create do
   package("aria2") { action :nothing }.run_action(:install)
 
   #construct the base aria2c command
-  command = "aria2c -V --summary-interval=0 --log-level=notice "
+  command = "aria2c -V --summary-interval=0 --log-level=notice -d#{new_resource.path} "
   command += "-l /tmp/#{torrent}.log --dht-file-path=/tmp/#{torrent}-dht.dat "
+  command += "--dht-listen-port #{new_resource.port} --listen-port #{new_resource.port} "
   if new_resource.upload_limit
     #multiply by 1024^2 to do megabytes
     command += "--max-overall-upload-limit=#{new_resource.upload_limit * 1024*1024} "
   end
-  command += "--dht-listen-port #{new_resource.port} --listen-port #{new_resource.port} "
   if new_resource.seeder
     command += "--dht-entry-point=#{new_resource.seeder}:#{new_resource.port} "
   end
-  command += "-d#{new_resource.path} "
 
   #there are 3 states we have to account for: blocking, seeding and running.
   if blocking
     if seeding
       if running? #BYSYRY
-        Chef::Log.info "Torrent #{torrentfile} already downloaded, already seeding #{new_resource.path}."
-        new_resource.updated_by_last_action(false)
+        Chef::Log.info "Torrent #{torrentfile} already downloaded and seeding."
       else #BYSYRN
+        torrentcleanup()
         #download in foreground
+        Chef::Log.info "Torrent #{torrentfile} downloaded and seeding."
         fgcommand = command + "--seed-time=0 #{torrentfile}"
         execute fgcommand
         #seed in background
         bgcommand = command + "-D --seed-ratio=0.0 #{torrentfile}"
         execute bgcommand
         new_resource.updated_by_last_action(true)
-      end #BYSN can't have Running
+      end
+    else #BYSN can't have Running
+      torrentcleanup()
       #download in foreground
       fgcommand = command + "--seed-time=0 #{torrentfile}"
-      execute fgcommand
       #!!!check the exit code to determine whether downloaded or not
-      #new_resource.updated_by_last_action(true)
+      Chef::Log.info fgcommand
+      download = Chef::ShellOut.new(fgcommand)
+      download.live_stream = STDOUT
+      download.run_command
+      #Chef::Log.info download.stdout
+      if download.stdout.include?("downloaded=0B")
+        Chef::Log.info "Torrent #{torrentfile} already downloaded."
+      else
+        Chef::Log.info "Torrent #{torrentfile} downloaded."
+        new_resource.updated_by_last_action(true)
+      end
     end
   else
     if seeding
       if running? #BNSYRY
-        Chef::Log.info "Torrent #{torrentfile} already seeding #{new_resource.path}."
-        new_resource.updated_by_last_action(false)
+        Chef::Log.info "Torrent #{torrentfile} already seeding."
       else #BNSYRN
+        torrentcleanup()
         #seed in background
+        Chef::Log.info "Torrent #{torrentfile} seeding."
         bgcommand = command + "-D --seed-ratio=0.0 #{torrentfile}"
         execute bgcommand
         new_resource.updated_by_last_action(true)
       end
     else
       if running? #BNSNRY
-        Chef::Log.info "Torrent #{torrentfile} already downloading #{new_resource.path}."
-        new_resource.updated_by_last_action(false)
+        Chef::Log.info "Torrent #{torrentfile} already downloading."
       else #BNSNRN
-        #download in background
+        torrentcleanup()
+        #download in background, no updated_by_last_action
+        Chef::Log.info "Torrent #{torrentfile} downloading."
         bgcommand = command + "-D --seed-time=0 #{torrentfile}"
         execute bgcommand
-        new_resource.updated_by_last_action(true)
       end
     end
   end
@@ -104,15 +106,11 @@ action :stop do
   torrent = ::File.basename(torrentfile)
   if running?
     execute "pkill -f #{torrent}"
+    torrentcleanup()
     new_resource.updated_by_last_action(true)
     Chef::Log.info "Torrent #{torrentfile} stopped."
   else
-    new_resource.updated_by_last_action(false)
     Chef::Log.debug "Torrent #{torrentfile} is already stopped."
-  end
-  file "/tmp/#{torrent}-dht.dat" do
-    backup false
-    action :delete
   end
 end
 
@@ -126,6 +124,19 @@ def running?
     return false
   else
     return true
+  end
+end
+
+#remove any existing dht or log files
+def torrentcleanup
+  torrent = ::File.basename(new_resource.torrent)
+  file "/tmp/#{torrent}.log" do
+    backup false
+    action :delete
+  end
+  file "/tmp/#{torrent}-dht.dat" do
+    backup false
+    action :delete
   end
 end
 

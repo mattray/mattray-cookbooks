@@ -18,26 +18,14 @@
 # limitations under the License.
 #
 
-package "aria2"
-
-template node['bittorrent']['config_file'] do
-  mode "0600"
-  source "aria2.conf.erb"
-end
+#use search to find the seeder
 
 #peer
 bittorrent_peer node['bittorrent']['torrent'] do
   path node['bittorrent']['path']
+  blocking true
   continue_seeding true
-  dht_listen_port node['bittorrent']['dht_listen_port']
-  listen_port node['bittorrent']['listen_port']
+  port node['bittorrent']['port']
+  #seeder "10.252.178.191"
   action :create
-end
-
-if node['bittorrent']['seeding']
-  #do the work
-else
-  bittorrent_peer node['bittorrent']['torrent'] do
-    action :stop
-  end
 end
