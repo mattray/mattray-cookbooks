@@ -21,6 +21,7 @@
 actions :create
 
 attribute :torrent, :kind_of => String, :name_attribute => true
+attribute :file, :kind_of => String
 attribute :path, :kind_of => String
 attribute :tracker, :kind_of => String, :default => "''"
 attribute :owner, :regex => Chef::Config[:user_valid_regex]
