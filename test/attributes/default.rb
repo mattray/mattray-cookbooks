@@ -1,1 +1,1 @@
-default['test']['yuck'] = ["abc"]
+default['test']['yuck'] = ["abc","aabbcc"]

@@ -1,3 +1,3 @@
 name "test"
 description "The test environment"
-override_attributes "test" => {"yuck" => [ "ghi" ]}
+override_attributes "test" => {"yuck" => [ "ghi","gghhii" ]}

@@ -6,6 +6,6 @@ run_list(
 
 default_attributes(
   "test" => {
-    "yuck" => ["def"]
+    "yuck" => ["def","ddeeff"]
   }
   )
