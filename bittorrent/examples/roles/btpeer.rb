@@ -7,7 +7,7 @@ run_list(
 default_attributes(
   "bittorrent" => {
     "file" => "testfile.big",
-    "path" => "/home/ubuntu/"
+    "path" => "/home/ubuntu/",
     "torrent" => "/tmp/testfile.torrent"
   }
   )

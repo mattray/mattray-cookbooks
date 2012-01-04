@@ -3,7 +3,7 @@
 # Cookbook Name:: bittorrent
 # Recipe:: peer
 #
-# Copyright 2011, Opscode, Inc.
+# Copyright 2011,2012 Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,36 @@
 # limitations under the License.
 #
 
-#use search to find the seeder
+#search on the node['bittorrent']['seeding'] and node['bittorrent']['file'] for seeding nodes
+#iterate get the magnet URI and append some &tr= to the ends
+#magnetURI
 
-#peer
-bittorrent_peer node['bittorrent']['torrent'] do
-  path node['bittorrent']['path']
-  blocking true
-  continue_seeding true
-  port node['bittorrent']['port']
-  #seeder "10.252.178.191"
-  action :create
+# bittorrent_peer magnetURI do
+#   path node['bittorrent']['file']
+#   path node['bittorrent']['path']
+#   port node['bittorrent']['port']
+#   blocking true
+#   continue_seeding true
+#   upload_limit node['bittorrent']['upload_limit']
+#   action :create
+# end
+
+#search on the bittorrent::seed recipe for nodes
+server = search(:node, 'recipes:bittorrent\:\:seed') || []
+if server.length > 0
+  seed = server[0].ipaddress
+  Chef::Log.info("bittorrent::seed server found at #{seed}.")
+
+  bittorrent_peer node['bittorrent']['torrent'] do
+    path "/tmp/"
+    seeder seed
+    blocking true
+    continue_seeding false
+    action :create
+  end
+
+else
+  Chef::Log.info("No bittorrent::seed server found, file not downloaded.")
 end
+
+

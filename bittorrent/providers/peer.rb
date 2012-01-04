@@ -30,7 +30,7 @@ action :create do
   package("aria2") { action :nothing }.run_action(:install)
 
   #construct the base aria2c command
-  command = "aria2c -V --summary-interval=0 --log-level=notice -d#{new_resource.path} "
+  command = "aria2c -V --summary-interval=0 --log-level=notice -d#{new_resource.path}/#{new_resource.file} "
   command += "-l /tmp/#{torrent}.log --dht-file-path=/tmp/#{torrent}-dht.dat "
   command += "--dht-listen-port #{new_resource.port} --listen-port #{new_resource.port} "
   if new_resource.upload_limit
@@ -139,11 +139,3 @@ def torrentcleanup
     action :delete
   end
 end
-
-#aria2c -V --summary-interval=0 --seed-ratio=0.0 --dht-file-path=/tmp/dht.dat --dht-listen-port 6881 --listen-port 6881 --dht-entry-point=10.4.163.3:6881 test0.torrent
-
-#scp -i ~/.ssh/mray.pem *torrent ubuntu@107.22.29.160:~/; scp -i ~/.ssh/mray.pem *torrent ubuntu@107.22.27.196:~/; scp -i ~/.ssh/mray.pem *torrent ubuntu@107.22.21.122:~/;
-
-#test exit codes for already done
-#aria2c -V --summary-interval=0 --seed-time=0 --dht-file-path=/tmp/dht.dat --dht-listen-port 6881 --listen-port 6881 --dht-entry-point=10.252.178.191:6881 test0.torrent
-

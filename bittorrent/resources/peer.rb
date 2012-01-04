@@ -21,9 +21,10 @@
 actions :create, :stop
 
 attribute :torrent, :kind_of => String, :name_attribute => true
+attribute :file, :kind_of => String
 attribute :path, :kind_of => String
 attribute :port, :kind_of => Integer, :default => 6881
-attribute :seeder, :kind_of => String
 attribute :blocking, :default => true
+attribute :seeder, :kind_of => String
 attribute :continue_seeding, :default => false
 attribute :upload_limit, :kind_of => Integer
