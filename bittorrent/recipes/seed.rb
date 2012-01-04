@@ -3,7 +3,7 @@
 # Cookbook Name:: bittorrent
 # Recipe:: seed
 #
-# Copyright 2011, Opscode, Inc.
+# Copyright 2011,2012 Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,19 @@
 # limitations under the License.
 #
 
-# create a torrent for using trackerless with DHT
 bittorrent_torrent node['bittorrent']['torrent'] do
   path node['bittorrent']['path']
+  file node['bittorrent']['file']
   tracker "node://#{node.ipaddress}:#{node['bittorrent']['port']}"
   action :create
 end
 
-#seed
-bittorrent_seed node['bittorrent']['torrent'] do
+bittorrent_seed node['bittorrent']['file'] do
+  torrent node['bittorrent']['torrent']
   path node['bittorrent']['path']
   port node['bittorrent']['port']
   upload_limit node['bittorrent']['upload_limit']
   action :create
 end
+
+#stash the .torrent file in a data bag for distributing it
