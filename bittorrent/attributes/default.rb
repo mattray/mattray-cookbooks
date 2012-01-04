@@ -3,7 +3,7 @@
 # Cookbook Name:: bittorrent
 # Attributes:: default
 #
-# Copyright 2011 Opscode, Inc
+# Copyright 2011,2012 Opscode, Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@
 # limitations under the License.
 #
 
-default[:bittorrent][:seed] = false
-
 default[:bittorrent][:file] = ""
 default[:bittorrent][:path] = "/tmp"
-default[:bittorrent][:torrent] = "/tmp/my.torrent"
+default[:bittorrent][:torrent] = "/tmp/chef.torrent"
 
-default[:bittorrent][:config_file] = "/etc/aria2.conf"
-default[:bittorrent][:logfile] = "/var/log/bittorrent.log"
+default[:bittorrent][:magneturi] = ""
+default[:bittorrent][:seed] = false
 
 default[:bittorrent][:port] = 6881
 default[:bittorrent][:upload_limit] = 0 #0 is unlimited
