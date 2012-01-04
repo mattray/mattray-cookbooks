@@ -42,7 +42,7 @@ if server.length > 0
     path "/tmp/"
     seeder seed
     blocking true
-    continue_seeding false
+    continue_seeding true
     action :create
   end
 
