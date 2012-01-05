@@ -18,12 +18,9 @@
 # limitations under the License.
 #
 
+default[:bittorrent][:torrent] = "/tmp/chef.torrent"
 default[:bittorrent][:file] = ""
 default[:bittorrent][:path] = "/tmp"
-default[:bittorrent][:torrent] = "/tmp/chef.torrent"
-
-default[:bittorrent][:magneturi] = ""
 default[:bittorrent][:seed] = false
-
 default[:bittorrent][:port] = 6881
 default[:bittorrent][:upload_limit] = 0 #0 is unlimited
