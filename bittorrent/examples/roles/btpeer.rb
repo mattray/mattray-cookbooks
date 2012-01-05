@@ -6,8 +6,9 @@ run_list(
 
 default_attributes(
   "bittorrent" => {
-    "file" => "testfile.big",
+    "seed" => true,
+    "file" => "crm84.tar.gz",
     "path" => "/home/ubuntu/",
-    "torrent" => "/tmp/testfile.torrent"
+    "torrent" => "/tmp/crm84.torrent"
   }
   )
