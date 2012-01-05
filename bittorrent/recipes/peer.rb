@@ -18,36 +18,23 @@
 # limitations under the License.
 #
 
-#search on the node['bittorrent']['seeding'] and node['bittorrent']['file'] for seeding nodes
-#iterate get the magnet URI and append some &tr= to the ends
-#magnetURI
+#should there be a flag for already downloaded? maybe store md5 in data bag?
 
-# bittorrent_peer magnetURI do
-#   path node['bittorrent']['file']
-#   path node['bittorrent']['path']
-#   port node['bittorrent']['port']
-#   blocking true
-#   continue_seeding true
-#   upload_limit node['bittorrent']['upload_limit']
-#   action :create
-# end
-
-#search on the bittorrent::seed recipe for nodes
-server = search(:node, 'recipes:bittorrent\:\:seed') || []
-if server.length > 0
-  seed = server[0].ipaddress
-  Chef::Log.info("bittorrent::seed server found at #{seed}.")
+#pull the .torrent file from the data bag
+torrent = data_bag_item('bittorrent', node['bittorrent']['file'])
+if torrent
+  #write out the .torrent file and base64 decode
+  #should this use the File resource, does it handle binary?
+  nf = File.open(node['bittorrent']['torrent'], 'wb')
+  nf.write(Base64.decode64(torrent['torrent']))
 
   bittorrent_peer node['bittorrent']['torrent'] do
-    path "/tmp/"
-    seeder seed
+    path node['bittorrent']['path']
+    seeder torrent['seed']
     blocking true
-    continue_seeding true
+    continue_seeding node[:bittorrent][:seed]
     action :create
   end
-
 else
-  Chef::Log.info("No bittorrent::seed server found, file not downloaded.")
+  Chef::Log.info("No torrent for #{node['bittorrent']['file']} found in data bag, file not downloaded.")
 end
-
-

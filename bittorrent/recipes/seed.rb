@@ -25,12 +25,38 @@ bittorrent_torrent node['bittorrent']['torrent'] do
   action :create
 end
 
+#if there's a new torrent, stop the seed and start with the new torrent
+bittorrent_seed "stop seeding" do
+  file node['bittorrent']['file']
+  action :nothing
+  subscribes :stop, resources(:bittorrent_torrent => node['bittorrent']['torrent']), :immediately
+end
+
 bittorrent_seed node['bittorrent']['file'] do
   torrent node['bittorrent']['torrent']
   path node['bittorrent']['path']
   port node['bittorrent']['port']
   upload_limit node['bittorrent']['upload_limit']
-  action :create
+  action :nothing
+  subscribes :create, resources(:bittorrent_seed => "stop seeding")
 end
 
 #stash the .torrent file in a data bag for distributing it
+ruby_block "share the torrent file" do
+  block do
+    f = File.open(node['bittorrent']['torrent'],'rb')
+    #read the .torrent file and base64 encode it
+    enc = Base64.encode64(f.read)
+    data = {
+      'id'=>node['bittorrent']['file'],
+      'seed'=>node.ipaddress,
+      'torrent'=>enc
+    }
+    item = Chef::DataBagItem.new
+    item.data_bag('bittorrent')
+    item.raw_data = data
+    item.save
+  end
+  action :nothing
+  subscribes :create, resources(:bittorrent_torrent => node['bittorrent']['torrent'])
+end
