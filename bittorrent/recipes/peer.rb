@@ -21,7 +21,7 @@
 #should there be a flag for already downloaded? maybe store md5 in data bag?
 
 #pull the .torrent file from the data bag
-torrent = data_bag_item('bittorrent', node['bittorrent']['file'])
+torrent = data_bag_item('bittorrent', bittorrent_item_id(node['bittorrent']['file']))
 if torrent
   #write out the .torrent file and base64 decode
   #should this use the File resource, does it handle binary?

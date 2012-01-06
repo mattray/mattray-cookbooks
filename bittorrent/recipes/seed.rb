@@ -32,15 +32,6 @@ bittorrent_seed "stop seeding" do
   subscribes :stop, resources(:bittorrent_torrent => node['bittorrent']['torrent']), :immediately
 end
 
-bittorrent_seed node['bittorrent']['file'] do
-  torrent node['bittorrent']['torrent']
-  path node['bittorrent']['path']
-  port node['bittorrent']['port']
-  upload_limit node['bittorrent']['upload_limit']
-  action :nothing
-  subscribes :create, resources(:bittorrent_seed => "stop seeding")
-end
-
 #stash the .torrent file in a data bag for distributing it
 ruby_block "share the torrent file" do
   block do
@@ -48,7 +39,7 @@ ruby_block "share the torrent file" do
     #read the .torrent file and base64 encode it
     enc = Base64.encode64(f.read)
     data = {
-      'id'=>node['bittorrent']['file'],
+      'id'=>bittorrent_item_id(node['bittorrent']['file']),
       'seed'=>node.ipaddress,
       'torrent'=>enc
     }
@@ -60,3 +51,12 @@ ruby_block "share the torrent file" do
   action :nothing
   subscribes :create, resources(:bittorrent_torrent => node['bittorrent']['torrent'])
 end
+
+bittorrent_seed node['bittorrent']['file'] do
+  torrent node['bittorrent']['torrent']
+  path node['bittorrent']['path']
+  port node['bittorrent']['port']
+  upload_limit node['bittorrent']['upload_limit']
+  action :create
+end
+
