@@ -20,6 +20,6 @@
 
 #takes out the offending characters from the id
 def bittorrent_item_id(id)
-  id.gsub!(/[-.]/, '_')
-  id
+  newid = id.gsub(/[-.]/, '_')
+  newid
 end
