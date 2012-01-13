@@ -18,6 +18,8 @@
 # limitations under the License.
 #
 
+include_recipe "bittorrent"
+
 bittorrent_torrent node['bittorrent']['torrent'] do
   path node['bittorrent']['path']
   file node['bittorrent']['file']

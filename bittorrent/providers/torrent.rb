@@ -26,7 +26,6 @@ include Chef::Mixin::ShellOut
 action :create do
   torrent = new_resource.torrent
   source = "#{new_resource.path}/#{new_resource.file}"
-  package("mktorrent") { action :nothing }.run_action(:install)
   #check if the file exists, check if it has changed
   if ::File.exists?(torrent)
     #generate a new version

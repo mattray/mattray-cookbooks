@@ -49,7 +49,6 @@ action :create do
     Chef::Log.info "Torrent #{torrent} for #{path}/#{file} already seeding."
     new_resource.updated_by_last_action(false)
   else
-    package("aria2") { action :nothing }.run_action(:install)
     command = "aria2c -D -V --seed-ratio=0.0 --log-level=notice "
     command += "-l /tmp/#{file}-torrent.log "
     command += "--dht-file-path=/tmp/#{file}-torrent-dht.dat "

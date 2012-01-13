@@ -18,6 +18,8 @@
 # limitations under the License.
 #
 
+include_recipe "bittorrent"
+
 #should there be a flag for already downloaded? maybe store md5 in data bag?
 
 #pull the .torrent file from the data bag

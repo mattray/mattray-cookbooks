@@ -1,9 +1,9 @@
 #
-# Author:: Matt Ray <matt@opscode.com>
+# Author:: Matt Ray (<matt@opscode.com>)
 # Cookbook Name:: bittorrent
-# Attributes:: default
+# Recipe:: default
 #
-# Copyright 2011,2012 Opscode, Inc
+# Copyright 2012 Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,15 @@
 # limitations under the License.
 #
 
-default[:bittorrent][:torrent] = "/tmp/chef.torrent"
-default[:bittorrent][:file] = ""
-default[:bittorrent][:path] = "/tmp"
-default[:bittorrent][:seed] = false
-default[:bittorrent][:port] = 6881
-default[:bittorrent][:upload_limit] = 0 #0 is unlimited
+# this recipe builds aria2 from source instead of using the version found by
+# the package manager. For now supports Ubuntu to upgrade the LTS version to
+# get past a bug. Will also be the base for CentOS support since there doesn't
+# seem to be a good repository for it.
 
-#no good packages exist for aria2 for RHEL/CentOS
-case node['platform']
-when "ubuntu"
-  default[:bittorrent][:source] = false
-when "redhat","centos"
-  default[:bittorrent][:source] = true
+package "mktorrent"
+
+if node['bittorrent']['source']
+  #build aria2 from included source
+else
+  package "aria2"
 end
