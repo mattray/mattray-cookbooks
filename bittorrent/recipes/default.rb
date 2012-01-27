@@ -18,15 +18,42 @@
 # limitations under the License.
 #
 
-# this recipe builds aria2 from source instead of using the version found by
-# the package manager. For now supports Ubuntu to upgrade the LTS version to
-# get past a bug. Will also be the base for CentOS support since there doesn't
-# seem to be a good repository for it.
-
+#mktorrent
+if platform?("redhat","centos")
+  include_recipe "yum::epel"
+  yum_repository "mktorrent" do
+    name "mktorrent"
+    #url "http://repos.fedorapeople.org/repos/peter/erlang/epel-5Server/#{node['kernel']['machine']}"
+    action :add
+  end
+end
 package "mktorrent"
 
+#aria2
 if node['bittorrent']['source']
-  #build aria2 from included source
+  include_recipe "build-essential"
+
+  #install packages for building
+  ["libgnutls-dev", "libgcrypt-dev", "libc-ares-dev", "libxml2-dev"].each do |pkg|
+    package pkg
+  end
+
+  #put the tarball in the build directory
+  cookbook_file "#{Chef::Config[:file_cache_path]}/aria2-#{node['bittorrent']['aria2version']}.tar.bz2" do
+    source "aria2-#{node['bittorrent']['aria2version']}.tar.bz2"
+  end
+
+  #build stuff
+  bash "compile_aria2" do
+    cwd Chef::Config[:file_cache_path]
+    creates "/usr/local/bin/aria2c"
+    code <<-EOH
+      tar -xjf aria2-#{node['bittorrent']['aria2version']}.tar.bz2
+      cd #{Chef::Config[:file_cache_path]}/aria2-#{node['bittorrent']['aria2version']}
+      ./configure --without-libnettle --with-libgcrypt --quiet
+      make install --quiet
+    EOH
+ end
 else
   package "aria2"
 end

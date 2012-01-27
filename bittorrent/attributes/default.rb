@@ -32,3 +32,5 @@ when "ubuntu"
 when "redhat","centos"
   default[:bittorrent][:source] = true
 end
+
+default[:bittorrent][:aria2version] = "1.14.1"

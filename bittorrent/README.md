@@ -6,7 +6,7 @@ Requirements
 ============
 Platform
 --------
-Tested with Ubuntu 10.04 and 11.04. Uses the `aria2` and `mktorrent` packages.
+Tested with Ubuntu 10.04, Ubuntu 11.04 and CentOS 5.3. Uses the `aria2` and `mktorrent` packages. RHEL packages are unavailable for `aria2`, so they are built from source.
 
 Networking
 ----------
@@ -130,6 +130,10 @@ These recipes are provided as an easy way to use bittorrent to share and downloa
 ```
 knife data bag create bittorrent
 ```
+
+default
+-------
+This recipe installs the `mktorrent` and `aria2` packages. If the `['bittorrent']['source']` attribute is set to "true" it will build `aria2` from source (the default for RHEL/CentOS and recommended for Ubuntu 10.04 because of the bugs fixed in the newer releases). This recipe is included by all the other recipes and only needs to be explicitly included if you are only using the LWRPs.
 
 seed
 ----
