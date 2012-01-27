@@ -27,8 +27,6 @@ action :create do
   blocking = new_resource.blocking
   seeding = new_resource.continue_seeding
 
-  package("aria2") { action :nothing }.run_action(:install)
-
   #construct the base aria2c command
   command = "aria2c -V --summary-interval=0 --log-level=notice -d#{new_resource.path}/#{new_resource.file} "
   command += "-l /tmp/#{torrent}.log --dht-file-path=/tmp/#{torrent}-dht.dat "

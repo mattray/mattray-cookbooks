@@ -24,3 +24,13 @@ default[:bittorrent][:path] = "/tmp"
 default[:bittorrent][:seed] = false
 default[:bittorrent][:port] = 6881
 default[:bittorrent][:upload_limit] = 0 #0 is unlimited
+
+#no good packages exist for aria2 for RHEL/CentOS
+case node['platform']
+when "ubuntu"
+  default[:bittorrent][:source] = false
+when "redhat","centos"
+  default[:bittorrent][:source] = true
+end
+
+default[:bittorrent][:aria2version] = "1.14.1"

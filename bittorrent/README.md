@@ -6,7 +6,7 @@ Requirements
 ============
 Platform
 --------
-Tested with Ubuntu 10.04 and 11.04. Uses the `aria2` and `mktorrent` packages.
+Tested with Ubuntu 10.04, Ubuntu 11.04 and CentOS 5.3. Uses the `aria2` and `mktorrent` packages. RHEL packages are unavailable for `aria2`, so they are built from source.
 
 Networking
 ----------
@@ -14,6 +14,8 @@ For torrentless trackers you must have both TCP and UDP open on the firewall for
 
 Resource/Provider
 =================
+To have access to the LWRPs without using the recipes, you must include the `bittorrent` recipe, which installs the `mktorrent` and `aria2` packages (and builds them if necessary).
+
 bittorrent_peer
 ---------------
 Download the file or files specified by a torrent via the [BitTorrent protocol](http://en.wikipedia.org/wiki/BitTorrent). Update notifications are triggered when a blocking download completes and on the initiation of seeding.
@@ -123,11 +125,15 @@ Creates a .torrent file for sharing a local file via the [BitTorrent protocol](h
 
 Recipes
 =======
-These recipes are provided as an easy way to use bittorrent to share and download files simply by passing the path and filename. They currently require the presence of a `bittorrent` data bag for automating the distribution of torrent files (the plan is to move to magnet URIs in the future).
+These recipes are provided as an easy way to use bittorrent to share and download files simply by passing the path and filename. They currently require the presence of a `bittorrent` data bag for automating the distribution of torrent files (the plan is to move to magnet URIs in the future). The default recipe is necessary if you are only using the LWRPs, it is included by all the other recipes since it installs the required packages.
 
 ```
 knife data bag create bittorrent
 ```
+
+default
+-------
+This recipe installs the `mktorrent` and `aria2` packages. If the `['bittorrent']['source']` attribute is set to "true" it will build `aria2` from source (the default for RHEL/CentOS and recommended for Ubuntu 10.04 because of the bugs fixed in the newer releases). This recipe is included by all the other recipes and only needs to be explicitly included if you are only using the LWRPs.
 
 seed
 ----
@@ -153,6 +159,7 @@ Attributes
 * `['bittorrent']['seed']` - Whether the node is seeding, defaults to `false`
 * `['bittorrent']['port']` - Bittorrent port to use, default is 6881
 * `['bittorrent']['upload_limit']` - Megabytes/second limit, default is 0 which is unlimited
+* `['bittorrent']['source']` - Whether to build `aria2` from source, defaults to "false" for Ubuntu and "true" for RHEL/CentOS since packages are unavailable.
 
 License and Author
 ==================
