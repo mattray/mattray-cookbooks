@@ -55,5 +55,15 @@ if node['bittorrent']['source']
     EOH
  end
 else
+  if platform?("ubuntu")
+    apt_repository "tatsuhirosPPA" do
+      uri "http://ppa.launchpad.net/t-tujikawa/ppa/ubuntu"
+      distribution node['lsb']['codename']
+      components ["main"]
+      keyserver "keyserver.ubuntu.com"
+      key "1CB94782"
+      action :add
+    end
+  end
   package "aria2"
 end
