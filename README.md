@@ -4,13 +4,29 @@ These cookbooks are not yet part of the Opscode repository for various reasons, 
 
 Cookbooks
 =========
+annoyances
+----------
+This cookbook has moved to https://github.com/mattray/annoyances-cookbook.
+
+bittorrent
+----------
+This cookbook has moved to https://github.com/mattray/bittorrent-cookbook.
+
 chrony
 ------
 Configures the time synchronization application `chrony` as a client or master timeserver, maintaining the accuracy of the system clock (similar to NTP). Isolated networks are supported as well.
 
+dhcp
+----
+In development cookbook to configure and manage DHCP tables via data bags.
+
 one-shot
 --------
 This cookbook provides a framework for making single-use, one-shot recipes. By including the `one-shot` recipe in the node's run_list, on the next chef-client run the contents of the `one-shot::one-shot` recipe will be called. This is parameterized as an attribute, so you can change these out by setting the `["one_shot"]["recipe"]` to include different recipes. The file `roles/one-shot.rb` is included so you can simply change the role instead of changing the source directly.
+
+squid
+-----
+This cookbook has moved to https://github.com/mattray/squid-cookbook.
 
 License and Author
 ==================
