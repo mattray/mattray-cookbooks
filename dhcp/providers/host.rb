@@ -1,6 +1,6 @@
 
 action :add do
-  filename = "/etc/dhcp3/hosts.d/#{new_resource.hostname}.conf"
+  filename = "/etc/dhcp/hosts.d/#{new_resource.hostname}.conf"
   template filename do 
     cookbook "dhcp"
     source "host.conf.erb"
@@ -13,29 +13,29 @@ action :add do
     owner "root"
     group "root"
     mode 0644
-    notifies :restart, resources(:service => "dhcp3-server"), :delayed
+    notifies :restart, resources(:service => "isc-dhcp-server"), :delayed
   end
   utils_line "include \"#{filename}\";" do
     action :add
-    file "/etc/dhcp3/hosts.d/host_list.conf"
-    notifies :restart, resources(:service => "dhcp3-server"), :delayed
+    file "/etc/dhcp/hosts.d/host_list.conf"
+    notifies :restart, resources(:service => "isc-dhcp-server"), :delayed
   end
 end
 
 action :remove do
-  filename = "/etc/dhcp3/hosts.d/#{new_resource.name}.conf"
+  filename = "/etc/dhcp/hosts.d/#{new_resource.name}.conf"
   if ::File.exists?(filename)
-    Chef::Log.info "Removing #{new_resource.name} host from /etc/dhcp3/hosts.d/"
+    Chef::Log.info "Removing #{new_resource.name} host from /etc/dhcp/hosts.d/"
     file filename do
       action :delete
-      notifies :restart, resources(:service => "dhcp3-server"), :delayed
+      notifies :restart, resources(:service => "isc-dhcp-server"), :delayed
     end
     new_resource.updated_by_last_action(true)
   end
   utils_line "include \"#{filename}\";" do
     action :remove
-    file "/etc/dhcp3/hosts.d/host_list.conf"
-    notifies :restart, resources(:service => "dhcp3-server"), :delayed
+    file "/etc/dhcp/hosts.d/host_list.conf"
+    notifies :restart, resources(:service => "isc-dhcp-server"), :delayed
   end
 end
 
