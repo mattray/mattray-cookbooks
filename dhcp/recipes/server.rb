@@ -47,7 +47,7 @@ Chef::Log.debug "allows: #{allows}"
 parameters = []
 parametersh = {}
 node['dhcp']['parameters'].each {|k, v| parametersh[k] = v}
-parametersh.merge!(default['parameters'])
+parametersh = default['parameters'].merge!(parametersh)
 parametersh.each {|k, v| parameters.push("#{k} #{v}")}
 parameters.sort!
 Chef::Log.debug "parameters: #{parameters}"
@@ -55,7 +55,7 @@ Chef::Log.debug "parameters: #{parameters}"
 options = []
 optionsh = {}
 node['dhcp']['options'].each {|k,v| optionsh[k] = v}
-optionsh.merge!(default['options'])
+optionsh = default['options'].merge!(optionsh)
 optionsh.each {|k, v| options.push("#{k} #{v}")}
 options.sort!
 Chef::Log.info "options: #{options}"
