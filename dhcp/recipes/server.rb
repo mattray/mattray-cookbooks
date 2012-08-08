@@ -18,18 +18,19 @@
 # limitations under the License.
 #
 
-package "dhcp3-server"
+package "isc-dhcp-server"
 
-service "dhcp3-server" do
+service "isc-dhcp-server" do
+  provider Chef::Provider::Service::Upstart
   supports :restart => true, :status => true, :reload => true
   action [ :enable ]
 end
 
-template "/etc/default/dhcp3-server" do
+template "/etc/default/isc-dhcp-server" do
   owner "root"
   group "root"
   mode 0644
-  source "dhcp3-server.erb"
+  source "isc-dhcp-server.erb"
   variables(:interfaces => node['dhcp']['interfaces'])
 end
 
@@ -46,7 +47,7 @@ Chef::Log.debug "allows: #{allows}"
 parameters = []
 parametersh = {}
 node['dhcp']['parameters'].each {|k, v| parametersh[k] = v}
-parametersh.merge!(default['parameters'])
+parametersh = default['parameters'].merge!(parametersh)
 parametersh.each {|k, v| parameters.push("#{k} #{v}")}
 parameters.sort!
 Chef::Log.debug "parameters: #{parameters}"
@@ -54,12 +55,12 @@ Chef::Log.debug "parameters: #{parameters}"
 options = []
 optionsh = {}
 node['dhcp']['options'].each {|k,v| optionsh[k] = v}
-optionsh.merge!(default['options'])
+optionsh = default['options'].merge!(optionsh)
 optionsh.each {|k, v| options.push("#{k} #{v}")}
 options.sort!
 Chef::Log.info "options: #{options}"
 
-template "/etc/dhcp3/dhcpd.conf" do
+template "/etc/dhcp/dhcpd.conf" do
   owner "root"
   group "root"
   mode 0644
@@ -70,14 +71,14 @@ template "/etc/dhcp3/dhcpd.conf" do
     :options => options
     )
   action :create
-  notifies :restart, resources(:service => "dhcp3-server"), :delayed
+  notifies :restart, resources(:service => "isc-dhcp-server"), :delayed
 end
 
 #groups
 groups = []
-directory "/etc/dhcp3/groups.d"
+directory "/etc/dhcp/groups.d"
 
-template "/etc/dhcp3/groups.d/group_list.conf" do
+template "/etc/dhcp/groups.d/group_list.conf" do
   owner "root"
   group "root"
   mode 0644
@@ -87,14 +88,14 @@ template "/etc/dhcp3/groups.d/group_list.conf" do
     :items => groups
     )
   action :create
-  notifies :restart, resources(:service => "dhcp3-server"), :delayed
+  notifies :restart, resources(:service => "isc-dhcp-server"), :delayed
 end
 
 #subnets
 subnets = []
-directory "/etc/dhcp3/subnets.d"
+directory "/etc/dhcp/subnets.d"
 
-template "/etc/dhcp3/subnets.d/subnet_list.conf" do
+template "/etc/dhcp/subnets.d/subnet_list.conf" do
   owner "root"
   group "root"
   mode 0644
@@ -104,13 +105,13 @@ template "/etc/dhcp3/subnets.d/subnet_list.conf" do
     :items => subnets
     )
   action :create
-  notifies :restart, resources(:service => "dhcp3-server"), :delayed
+  notifies :restart, resources(:service => "isc-dhcp-server"), :delayed
 end
 
 #hosts
 hosts = []
-directory "/etc/dhcp3/hosts.d"
-template "/etc/dhcp3/hosts.d/host_list.conf" do
+directory "/etc/dhcp/hosts.d"
+template "/etc/dhcp/hosts.d/host_list.conf" do
   owner "root"
   group "root"
   mode 0644
@@ -120,5 +121,5 @@ template "/etc/dhcp3/hosts.d/host_list.conf" do
     :items => hosts
     )
   action :create
-  notifies :restart, resources(:service => "dhcp3-server"), :delayed
+  notifies :restart, resources(:service => "isc-dhcp-server"), :delayed
 end
